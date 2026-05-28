@@ -21,6 +21,7 @@ class UserOut(BaseModel):
     id: uuid.UUID
     email: EmailStr
     name: str
+    is_instructor: bool = False
     created_at: datetime
 
 
@@ -28,3 +29,7 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserOut
+
+
+class GoogleAuthRequest(BaseModel):
+    credential: str

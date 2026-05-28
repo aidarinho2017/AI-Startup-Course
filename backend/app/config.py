@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRES_MINUTES: int = 60 * 24 * 7  # 7 days
 
+    GOOGLE_CLIENT_ID: str = ""
+
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-5.4-mini"
 

@@ -58,3 +58,26 @@ export type Summary = {
   summary: Record<string, unknown>;
   generated_at: string;
 };
+
+export type InstructorModule = {
+  slug: string;
+  title: string;
+  order_index: number;
+  submission_count: number;
+};
+
+export type InstructorStudent = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+export type InstructorSubmission = {
+  id: number;
+  student: InstructorStudent;
+  content: Record<string, string>;
+  instructor_feedback: string | null;
+  is_reviewed: boolean;
+  submitted_at: string;
+  updated_at: string;
+};

@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.routers import auth, chat, dashboard, modules, submissions
+from app.routers import auth, chat, dashboard, instructor, modules, submissions
 
 
 @asynccontextmanager
@@ -33,3 +33,4 @@ app.include_router(modules.router, prefix="/modules", tags=["modules"])
 app.include_router(submissions.router, prefix="/modules", tags=["submissions"])
 app.include_router(chat.router, prefix="/modules", tags=["chat"])
 app.include_router(dashboard.router, prefix="/dashboard", tags=["dashboard"])
+app.include_router(instructor.router, prefix="/instructor", tags=["instructor"])

@@ -36,5 +36,12 @@ async def get_current_user(
     return user
 
 
+async def get_current_instructor(user: Annotated[User, Depends(get_current_user)]) -> User:
+    if not user.is_instructor:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Instructor access only")
+    return user
+
+
 CurrentUser = Annotated[User, Depends(get_current_user)]
+CurrentInstructor = Annotated[User, Depends(get_current_instructor)]
 DbSession = Annotated[AsyncSession, Depends(get_db)]

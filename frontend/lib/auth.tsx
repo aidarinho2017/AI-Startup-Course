@@ -8,6 +8,7 @@ export type User = {
   id: string;
   email: string;
   name: string;
+  is_instructor: boolean;
   created_at: string;
 };
 
@@ -16,6 +17,7 @@ type AuthContextValue = {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string) => Promise<void>;
+  googleLogin: (credential: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -63,6 +65,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push("/dashboard");
   };
 
+  const googleLogin = async (credential: string) => {
+    const res = await api<TokenResponse>("/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ credential }),
+    });
+    setToken(res.access_token);
+    setUser(res.user);
+    router.push("/dashboard");
+  };
+
   const logout = () => {
     setToken(null);
     setUser(null);
@@ -70,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, googleLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );

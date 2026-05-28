@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { GoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +12,7 @@ import { ApiError } from "@/lib/api";
 import { GuestOnly } from "@/components/auth-redirect";
 
 function SignupInner() {
-  const { signup } = useAuth();
+  const { signup, googleLogin } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,7 +44,29 @@ function SignupInner() {
             Create an account and start the course.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={async ({ credential }) => {
+                if (!credential) return;
+                setError(null);
+                try {
+                  await googleLogin(credential);
+                } catch (err) {
+                  setError(err instanceof ApiError ? err.message : "Google sign-up failed");
+                }
+              }}
+              onError={() => setError("Google sign-up failed")}
+              width="100%"
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
           <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>

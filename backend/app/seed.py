@@ -6,7 +6,9 @@ from sqlalchemy import select
 
 from app.content.modules_seed import MODULES
 from app.db import SessionLocal
-from app.models import Module, Video
+from app.models import Module, User, Video
+
+INSTRUCTOR_EMAIL = "isakhanovaidar@gmail.com"
 
 
 async def seed() -> None:
@@ -54,6 +56,16 @@ async def seed() -> None:
                     await db.delete(video)
 
         await db.commit()
+
+    async with SessionLocal() as db:
+        instructor = await db.scalar(select(User).where(User.email == INSTRUCTOR_EMAIL))
+        if instructor:
+            instructor.is_instructor = True
+            await db.commit()
+            print(f"Set {INSTRUCTOR_EMAIL} as instructor.")
+        else:
+            print(f"Instructor account ({INSTRUCTOR_EMAIL}) not found — will be set on first login.")
+
     print(f"Seeded {len(MODULES)} modules.")
 
 

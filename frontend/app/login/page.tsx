@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { GoogleLogin } from "@react-oauth/google";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +12,7 @@ import { ApiError } from "@/lib/api";
 import { GuestOnly } from "@/components/auth-redirect";
 
 function LoginInner() {
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +39,29 @@ function LoginInner() {
             Log in to continue your startup execution.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          <div className="flex justify-center">
+            <GoogleLogin
+              onSuccess={async ({ credential }) => {
+                if (!credential) return;
+                setError(null);
+                try {
+                  await googleLogin(credential);
+                } catch (err) {
+                  setError(err instanceof ApiError ? err.message : "Google login failed");
+                }
+              }}
+              onError={() => setError("Google login failed")}
+              width="100%"
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted-foreground">or</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
           <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

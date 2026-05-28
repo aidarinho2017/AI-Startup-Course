@@ -13,6 +13,11 @@ export function Topbar() {
           AI Startup Course
         </Link>
         <div className="flex items-center gap-3">
+          {user?.is_instructor && (
+            <Link href="/instructor" className="text-sm text-muted-foreground hover:text-foreground">
+              Instructor
+            </Link>
+          )}
           {user && (
             <span className="hidden text-sm text-muted-foreground sm:inline">
               {user.name}
