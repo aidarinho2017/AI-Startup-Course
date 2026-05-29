@@ -146,7 +146,7 @@ export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQues
         <CardContent className="space-y-4">
           <div
             ref={scrollRef}
-            className="h-[32rem] overflow-y-auto rounded-md border border-border bg-muted/30 p-4"
+            className="h-[50vh] min-h-[16rem] max-h-[32rem] overflow-y-auto rounded-md border border-border bg-muted/30 p-4"
           >
             {messages.length === 0 && !streaming && (
               <p className="text-sm text-muted-foreground">

@@ -34,7 +34,7 @@ function ModuleInner({ slug }: { slug: string }) {
   return (
     <div>
       <Topbar />
-      <main className="px-8 py-10">
+      <main className="px-4 sm:px-8 py-6 sm:py-10">
         <Link
           href="/dashboard"
           className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground"
@@ -68,7 +68,7 @@ function ModuleInner({ slug }: { slug: string }) {
               <p className="text-muted-foreground">{data.description}</p>
             </div>
 
-            <div className="mt-10 flex gap-8 items-start">
+            <div className="mt-8 flex flex-col lg:flex-row gap-8 items-start">
               {/* Left column: videos + homework */}
               <div className="flex-1 min-w-0 space-y-10">
                 {data.videos.length > 0 && (
@@ -103,7 +103,7 @@ function ModuleInner({ slug }: { slug: string }) {
 
               {/* Right column: AI mentor */}
               {data.has_chatbot && (
-                <div className="w-[30rem] shrink-0 sticky top-6 self-start">
+                <div className="w-full lg:w-[30rem] lg:shrink-0 lg:sticky lg:top-6 lg:self-start">
                   <ChatPanel
                     slug={data.slug}
                     openingQuestion={MENTOR_QUESTIONS[data.slug]}
