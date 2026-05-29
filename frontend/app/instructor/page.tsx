@@ -35,7 +35,7 @@ function InstructorDashboardInner() {
                       <p className="text-xs uppercase tracking-widest text-muted-foreground">
                         Module {m.order_index}
                       </p>
-                      <Badge variant={m.submission_count > 0 ? "default" : "secondary"}>
+                      <Badge variant={m.submission_count > 0 ? "default" : "outline"}>
                         {m.submission_count} submission{m.submission_count !== 1 ? "s" : ""}
                       </Badge>
                     </div>
