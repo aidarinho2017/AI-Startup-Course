@@ -21,6 +21,10 @@ class UserOut(BaseModel):
     id: uuid.UUID
     email: EmailStr
     name: str
+    first_name: str | None = None
+    last_name: str | None = None
+    dream: str | None = None
+    study_group_id: int | None = None
     is_instructor: bool = False
     created_at: datetime
 

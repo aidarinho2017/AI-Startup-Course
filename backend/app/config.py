@@ -10,6 +10,13 @@ class Settings(BaseSettings):
     DATABASE_URL: str = Field(
         default="postgresql+asyncpg://postgres:postgres@localhost:5432/ai_startup_course"
     )
+    DB_POOL_SIZE: int = 5
+    DB_MAX_OVERFLOW: int = 5
+    DB_POOL_TIMEOUT_SECONDS: int = 10
+    DB_POOL_RECYCLE_SECONDS: int = 1800
+    DB_CONNECT_TIMEOUT_SECONDS: int = 10
+    DB_COMMAND_TIMEOUT_SECONDS: int = 30
+
     JWT_SECRET: str = Field(default="change_me_in_production")
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRES_MINUTES: int = 60 * 24 * 7  # 7 days
@@ -18,6 +25,13 @@ class Settings(BaseSettings):
 
     OPENAI_API_KEY: str = ""
     OPENAI_MODEL: str = "gpt-5.4-mini"
+
+    TELEGRAM_BOT_TOKEN: str = ""
+    TELEGRAM_BOT_USERNAME: str = ""
+    TELEGRAM_WEBHOOK_SECRET: str = ""
+    TELEGRAM_WEBHOOK_URL: str = ""
+    TELEGRAM_LINK_CODE_TTL_MINUTES: int = 15
+    TELEGRAM_REMINDER_INTERVAL_SECONDS: int = 300
 
     CORS_ORIGINS: str = "http://localhost:3000"
 

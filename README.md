@@ -78,7 +78,15 @@ Edit `backend/app/content/modules_seed.py`, then re-run the seeder:
 cd backend && python -m app.seed
 ```
 
-The seeder is idempotent — it adds new videos and removes ones no longer in the spec without touching user data.
+The seeder is idempotent — it adds new videos and removes ones no longer in the spec without touching user data. Add an optional `due_at` datetime to a module spec to enable Telegram deadline reminders for that module.
+
+## Telegram setup
+
+1. Create a bot with BotFather and set `TELEGRAM_BOT_TOKEN`.
+2. Set `TELEGRAM_BOT_USERNAME` to the bot username without `@` so the dashboard can open the bot link.
+3. Set `TELEGRAM_WEBHOOK_SECRET` to a random secret.
+4. Set `TELEGRAM_WEBHOOK_URL` to your public backend URL plus `/telegram/webhook`.
+5. Fill module `due_at` values when you are ready for reminders. Null deadlines do not send reminders.
 
 ## Environment variables
 
@@ -90,6 +98,12 @@ The seeder is idempotent — it adds new videos and removes ones no longer in th
 | `JWT_SECRET` | Random secret for signing JWTs — generate with `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
 | `OPENAI_API_KEY` | Your OpenAI API key |
 | `OPENAI_MODEL` | Model name, e.g. `gpt-4o-mini` |
+| `TELEGRAM_BOT_TOKEN` | Telegram Bot API token from BotFather |
+| `TELEGRAM_BOT_USERNAME` | Bot username without `@`, used for dashboard deep links |
+| `TELEGRAM_WEBHOOK_SECRET` | Secret checked against Telegram webhook requests |
+| `TELEGRAM_WEBHOOK_URL` | Public webhook URL, e.g. `https://api.example.com/telegram/webhook` |
+| `TELEGRAM_LINK_CODE_TTL_MINUTES` | Link-code lifetime in minutes, default `15` |
+| `TELEGRAM_REMINDER_INTERVAL_SECONDS` | Reminder loop interval, default `300` |
 | `CORS_ORIGINS` | Comma-separated allowed origins, e.g. `http://localhost:3000` |
 
 ### frontend/.env.local

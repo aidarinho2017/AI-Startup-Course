@@ -1,3 +1,6 @@
+import logging
+from time import perf_counter
+
 from fastapi import APIRouter, HTTPException, status
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
@@ -16,6 +19,7 @@ from app.schemas.auth import (
 from app.services.security import create_access_token, hash_password, verify_password
 
 router = APIRouter()
+logger = logging.getLogger("uvicorn.error")
 
 
 @router.post("/signup", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
@@ -39,8 +43,27 @@ async def signup(body: SignupRequest, db: DbSession) -> TokenResponse:
 
 @router.post("/login", response_model=TokenResponse)
 async def login(body: LoginRequest, db: DbSession) -> TokenResponse:
+    total_start = perf_counter()
+    db_start = perf_counter()
     user = await db.scalar(select(User).where(User.email == body.email.lower()))
-    if user is None or not user.password_hash or not verify_password(body.password, user.password_hash):
+    db_seconds = perf_counter() - db_start
+
+    verify_seconds = 0.0
+    password_ok = False
+    if user is not None and user.password_hash:
+        verify_start = perf_counter()
+        password_ok = verify_password(body.password, user.password_hash)
+        verify_seconds = perf_counter() - verify_start
+
+    logger.info(
+        "auth.login timing db_lookup_seconds=%.3f password_verify_seconds=%.3f total_seconds=%.3f user_found=%s",
+        db_seconds,
+        verify_seconds,
+        perf_counter() - total_start,
+        user is not None,
+    )
+
+    if user is None or not user.password_hash or not password_ok:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password"
         )

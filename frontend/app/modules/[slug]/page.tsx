@@ -54,13 +54,20 @@ function ModuleInner({ slug }: { slug: string }) {
         {data && (
           <>
             <div className="mt-4 space-y-2">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <p className="text-xs uppercase tracking-widest text-muted-foreground">
                   Module {data.order_index}
                 </p>
                 {data.is_completed && (
                   <Badge variant="success">Completed</Badge>
                 )}
+                {data.due_at ? (
+                  <Badge variant="outline">
+                    Due {new Date(data.due_at).toLocaleString()}
+                  </Badge>
+                ) : data.deadline_state === "not_set" ? (
+                  <Badge variant="outline">Deadline not set yet</Badge>
+                ) : null}
               </div>
               <h1 className="text-3xl font-semibold tracking-tight">
                 {data.title}

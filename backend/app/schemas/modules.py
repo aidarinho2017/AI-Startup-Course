@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, ConfigDict
 
 
@@ -23,6 +25,8 @@ class ModuleListOut(BaseModel):
     description: str
     order_index: int
     has_chatbot: bool
+    due_at: datetime | None = None
+    deadline_state: str = "no_group"
     is_completed: bool
 
 
@@ -32,6 +36,8 @@ class ModuleDetailOut(BaseModel):
     description: str
     order_index: int
     has_chatbot: bool
+    due_at: datetime | None = None
+    deadline_state: str = "no_group"
     is_completed: bool
     videos: list[VideoOut]
     submission_fields: list[SubmissionFieldSpec]

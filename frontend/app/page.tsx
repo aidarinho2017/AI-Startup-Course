@@ -38,6 +38,9 @@ export default function LandingPage() {
           <Link href="/login" className={cn(btnBase, btnOutline)}>
             I already have an account
           </Link>
+          <Link href="/toolkit" className={cn(btnBase, btnOutline)}>
+            Startup Toolkit
+          </Link>
         </div>
       </div>
 

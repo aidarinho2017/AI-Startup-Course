@@ -25,6 +25,8 @@ function SubmissionCard({ sub, moduleSlug }: { sub: InstructorSubmission; module
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["instructor-submissions", moduleSlug] });
+      queryClient.invalidateQueries({ queryKey: ["instructor-students"] });
+      queryClient.invalidateQueries({ queryKey: ["instructor-student-submissions"] });
     },
   });
 
@@ -35,6 +37,9 @@ function SubmissionCard({ sub, moduleSlug }: { sub: InstructorSubmission; module
           <div>
             <CardTitle className="text-base">{sub.student.name}</CardTitle>
             <p className="text-sm text-muted-foreground">{sub.student.email}</p>
+            {sub.student.study_group && (
+              <p className="text-sm text-muted-foreground">{sub.student.study_group.name}</p>
+            )}
           </div>
           {sub.is_reviewed && <Badge variant="success">Reviewed</Badge>}
         </div>

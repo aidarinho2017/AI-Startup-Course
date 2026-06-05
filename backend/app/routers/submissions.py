@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from sqlalchemy import select
 
 from app.content.modules_seed import MODULES
 from app.deps import CurrentUser, DbSession
 from app.models import Module, Submission
 from app.schemas.submissions import SubmissionIn, SubmissionOut
+from app.services.telegram_service import send_task_completed
 
 router = APIRouter()
 
@@ -58,7 +59,11 @@ async def get_submission(slug: str, user: CurrentUser, db: DbSession) -> Submiss
 
 @router.put("/{slug}/submission", response_model=SubmissionOut)
 async def upsert_submission(
-    slug: str, body: SubmissionIn, user: CurrentUser, db: DbSession
+    slug: str,
+    body: SubmissionIn,
+    user: CurrentUser,
+    db: DbSession,
+    background_tasks: BackgroundTasks,
 ) -> SubmissionOut:
     module = await db.scalar(select(Module).where(Module.slug == slug))
     if module is None:
@@ -69,11 +74,16 @@ async def upsert_submission(
             Submission.user_id == user.id, Submission.module_id == module.id
         )
     )
-    if sub is None:
+    is_new_submission = sub is None
+    if is_new_submission:
         sub = Submission(user_id=user.id, module_id=module.id, content=cleaned)
         db.add(sub)
     else:
         sub.content = cleaned
     await db.commit()
     await db.refresh(sub)
+    if is_new_submission:
+        background_tasks.add_task(
+            send_task_completed, user.telegram_chat_id, module.title
+        )
     return SubmissionOut.model_validate(sub)

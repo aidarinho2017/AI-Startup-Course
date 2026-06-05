@@ -8,7 +8,8 @@ YouTube IDs are placeholders — the user can swap them at any time by editing
 this file and re-running `python -m app.seed`.
 """
 
-from typing import TypedDict
+from datetime import datetime
+from typing import NotRequired, TypedDict
 
 
 class FieldSpec(TypedDict, total=False):
@@ -30,6 +31,7 @@ class ModuleSpec(TypedDict):
     description: str
     order_index: int
     has_chatbot: bool
+    due_at: NotRequired[datetime | None]
     videos: list[VideoSpec]
     submission_fields: list[FieldSpec]
 

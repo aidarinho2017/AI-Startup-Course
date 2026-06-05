@@ -6,8 +6,10 @@ import { api } from "@/lib/api";
 import { DashboardOut } from "@/lib/types";
 import { Protected } from "@/components/protected";
 import { Topbar } from "@/components/topbar";
+import { TelegramLinkPanel } from "@/components/telegram-link-panel";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 
 function DashboardInner() {
@@ -20,14 +22,19 @@ function DashboardInner() {
     <div>
       <Topbar />
       <main className="mx-auto max-w-5xl px-6 py-10">
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground">
-            Your course
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Six modules. Build, submit, ship.
-          </p>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-2">
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">
+              Your course
+            </p>
+            <h1 className="text-3xl font-semibold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground">
+              Six modules. Build, submit, ship.
+            </p>
+          </div>
+          <Link href="/toolkit">
+            <Button variant="outline">Startup Toolkit</Button>
+          </Link>
         </div>
 
         {isLoading && (
@@ -56,6 +63,10 @@ function DashboardInner() {
               <Progress value={data.progress_pct} />
             </div>
 
+            <div className="mt-8">
+              <TelegramLinkPanel />
+            </div>
+
             <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {data.modules
                 .slice()
@@ -79,10 +90,19 @@ function DashboardInner() {
                           {m.description}
                         </CardDescription>
                       </CardHeader>
-                      <CardContent>
+                      <CardContent className="space-y-2">
                         <div className="text-xs text-muted-foreground">
                           {m.has_chatbot ? "AI mentor • Homework" : "Homework"}
                         </div>
+                        {m.due_at ? (
+                          <div className="text-xs text-muted-foreground">
+                            Due {new Date(m.due_at).toLocaleString()}
+                          </div>
+                        ) : m.deadline_state === "not_set" ? (
+                          <div className="text-xs text-muted-foreground">
+                            Deadline not set yet
+                          </div>
+                        ) : null}
                       </CardContent>
                     </Card>
                   </Link>

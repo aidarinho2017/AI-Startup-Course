@@ -8,6 +8,10 @@ export type User = {
   id: string;
   email: string;
   name: string;
+  first_name: string | null;
+  last_name: string | null;
+  dream: string | null;
+  study_group_id: number | null;
   is_instructor: boolean;
   created_at: string;
 };

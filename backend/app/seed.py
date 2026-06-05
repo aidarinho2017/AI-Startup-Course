@@ -22,6 +22,7 @@ async def seed() -> None:
                     description=spec["description"],
                     order_index=spec["order_index"],
                     has_chatbot=spec["has_chatbot"],
+                    due_at=spec.get("due_at"),
                 )
                 db.add(module)
                 await db.flush()
@@ -30,6 +31,7 @@ async def seed() -> None:
                 module.description = spec["description"]
                 module.order_index = spec["order_index"]
                 module.has_chatbot = spec["has_chatbot"]
+                module.due_at = spec.get("due_at")
 
             existing_videos = {
                 v.youtube_id: v
