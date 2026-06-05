@@ -10,6 +10,7 @@ from app.config import settings
 from app.deps import CurrentUser, DbSession
 from app.models import Module, StudyGroup, StudyGroupDeadline, Submission, User
 from app.schemas.telegram import TelegramLinkCodeOut, TelegramStatusOut
+from app.services.telegram_ai import queue_telegram_ai_message
 from app.services.telegram_service import (
     send_message,
     telegram_bot_username,
@@ -101,7 +102,11 @@ async def telegram_webhook(
     elif command:
         await send_message(chat_id_str, f"Unknown command: {command}\n\n{await _help_message(db, chat_id_str)}")
     else:
-        await _handle_link_code(db, chat_id_str, args)
+        linked_user = await _linked_user(db, chat_id_str)
+        if linked_user is not None and not _looks_like_link_code(args):
+            await queue_telegram_ai_message(linked_user, chat_id_str, args)
+        else:
+            await _handle_link_code(db, chat_id_str, args)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -183,6 +188,7 @@ async def _help_message(db: DbSession, chat_id: str) -> str:
         )
     return (
         "AI Startup Course bot\n\n"
+        "Send any course or startup question here. I will collect your messages and reply after about a minute of silence.\n\n"
         "Commands:\n"
         "/status - show course progress\n"
         "/deadlines - show upcoming deadlines\n"
@@ -309,6 +315,11 @@ def _parse_command(text: str) -> tuple[str | None, str]:
     if not first.startswith("/"):
         return None, value
     return first.split("@", 1)[0].lower(), rest
+
+
+def _looks_like_link_code(text: str) -> bool:
+    value = text.strip().upper()
+    return len(value) == CODE_LENGTH and all(char in CODE_ALPHABET for char in value)
 
 
 def _hash_code(code: str) -> str:

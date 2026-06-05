@@ -65,6 +65,18 @@ async def send_message(chat_id: str | None, text: str) -> bool:
     )
 
 
+async def send_chat_action(chat_id: str | None, action: str = "typing") -> bool:
+    if not chat_id:
+        return False
+    return await _post(
+        "sendChatAction",
+        {
+            "chat_id": chat_id,
+            "action": action,
+        },
+    )
+
+
 async def send_task_completed(chat_id: str | None, module_title: str) -> bool:
     return await send_message(chat_id, f"You've done the task: {module_title}.")
 

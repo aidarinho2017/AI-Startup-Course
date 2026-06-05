@@ -7,22 +7,25 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.routers import auth, chat, dashboard, instructor, modules, profile, submissions, telegram
 from app.services.reminders import run_deadline_reminder_loop
+from app.services.telegram_ai import run_telegram_ai_loop
 from app.services.telegram_service import configure_webhook
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    reminder_task: asyncio.Task | None = None
+    background_tasks: list[asyncio.Task] = []
     await configure_webhook()
     if settings.TELEGRAM_BOT_TOKEN:
-        reminder_task = asyncio.create_task(run_deadline_reminder_loop())
+        background_tasks.append(asyncio.create_task(run_deadline_reminder_loop()))
+        background_tasks.append(asyncio.create_task(run_telegram_ai_loop()))
     try:
         yield
     finally:
-        if reminder_task:
-            reminder_task.cancel()
+        for task in background_tasks:
+            task.cancel()
+        for task in background_tasks:
             with suppress(asyncio.CancelledError):
-                await reminder_task
+                await task
 
 
 app = FastAPI(title="AI Startup Course", version="0.1.0", lifespan=lifespan)
