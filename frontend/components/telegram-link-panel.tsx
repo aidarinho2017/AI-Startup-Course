@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Copy, ExternalLink, RefreshCw, Send } from "lucide-react";
+import { CheckCircle2, Copy, ExternalLink, RefreshCw, Send, Unlink } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { TelegramLinkCode, TelegramStatus } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ export function TelegramLinkPanel() {
   });
   const [linkCode, setLinkCode] = useState<TelegramLinkCode | null>(null);
   const [generating, setGenerating] = useState(false);
+  const [unlinking, setUnlinking] = useState(false);
   const [copyLabel, setCopyLabel] = useState("Copy");
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -48,6 +49,20 @@ export function TelegramLinkPanel() {
   const openBot = () => {
     if (linkCode?.start_url) {
       window.open(linkCode.start_url, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const unlinkTelegram = async () => {
+    setUnlinking(true);
+    setActionError(null);
+    try {
+      await api<TelegramStatus>("/telegram/unlink", { method: "POST" });
+      setLinkCode(null);
+      await refetch();
+    } catch (err) {
+      setActionError(err instanceof ApiError ? err.message : "Failed to unlink Telegram");
+    } finally {
+      setUnlinking(false);
     }
   };
 
@@ -103,11 +118,23 @@ export function TelegramLinkPanel() {
         )}
 
         {data?.is_linked && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-            {data.linked_at
-              ? `Linked ${new Date(data.linked_at).toLocaleString()}`
-              : "Linked"}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+              {data.linked_at
+                ? `Linked ${new Date(data.linked_at).toLocaleString()}`
+                : "Linked"}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={unlinkTelegram}
+              disabled={unlinking}
+            >
+              <Unlink className="h-4 w-4" />
+              {unlinking ? "Unlinking…" : "Unlink"}
+            </Button>
           </div>
         )}
 

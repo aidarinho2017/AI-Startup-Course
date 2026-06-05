@@ -69,8 +69,30 @@ async def send_task_completed(chat_id: str | None, module_title: str) -> bool:
     return await send_message(chat_id, f"You've done the task: {module_title}.")
 
 
+async def send_task_updated(chat_id: str | None, module_title: str) -> bool:
+    return await send_message(chat_id, f"You've updated the task: {module_title}.")
+
+
+async def send_instructor_feedback(
+    chat_id: str | None,
+    module_title: str,
+    feedback: str,
+) -> bool:
+    feedback = feedback.strip()
+    if not feedback:
+        return False
+    text = f'Instructor feedback for "{module_title}":\n\n{_truncate(feedback, 3600)}'
+    return await send_message(chat_id, text)
+
+
 async def send_deadline_reminder(chat_id: str | None, module_title: str, label: str) -> bool:
     return await send_message(
         chat_id,
         f'Reminder: "{module_title}" is due in about {label}. Submit your artifacts before the deadline.',
     )
+
+
+def _truncate(value: str, max_length: int) -> str:
+    if len(value) <= max_length:
+        return value
+    return f"{value[: max_length - 3]}..."

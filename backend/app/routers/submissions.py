@@ -5,7 +5,7 @@ from app.content.modules_seed import MODULES
 from app.deps import CurrentUser, DbSession
 from app.models import Module, Submission
 from app.schemas.submissions import SubmissionIn, SubmissionOut
-from app.services.telegram_service import send_task_completed
+from app.services.telegram_service import send_task_completed, send_task_updated
 
 router = APIRouter()
 
@@ -75,15 +75,21 @@ async def upsert_submission(
         )
     )
     is_new_submission = sub is None
+    is_changed_submission = False
     if is_new_submission:
         sub = Submission(user_id=user.id, module_id=module.id, content=cleaned)
         db.add(sub)
     else:
+        is_changed_submission = sub.content != cleaned
         sub.content = cleaned
     await db.commit()
     await db.refresh(sub)
     if is_new_submission:
         background_tasks.add_task(
             send_task_completed, user.telegram_chat_id, module.title
+        )
+    elif is_changed_submission:
+        background_tasks.add_task(
+            send_task_updated, user.telegram_chat_id, module.title
         )
     return SubmissionOut.model_validate(sub)

@@ -1,6 +1,6 @@
 import uuid
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from sqlalchemy import func, select
 
 from app.deps import CurrentInstructor, DbSession
@@ -20,6 +20,7 @@ from app.schemas.instructor import (
     StudyGroupUpdateIn,
 )
 from app.schemas.profile import StudyGroupOut
+from app.services.telegram_service import send_instructor_feedback
 
 router = APIRouter()
 
@@ -235,6 +236,7 @@ async def update_feedback(
     body: FeedbackIn,
     instructor: CurrentInstructor,
     db: DbSession,
+    background_tasks: BackgroundTasks,
 ):
     row = (
         await db.execute(
@@ -250,10 +252,21 @@ async def update_feedback(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found")
 
     sub, user, group, module = row
-    sub.instructor_feedback = _clean_optional(body.instructor_feedback)
+    previous_feedback = _clean_optional(sub.instructor_feedback)
+    next_feedback = _clean_optional(body.instructor_feedback)
+    should_notify_feedback = bool(next_feedback) and next_feedback != previous_feedback
+    sub.instructor_feedback = next_feedback
     sub.is_reviewed = body.is_reviewed
     await db.commit()
     await db.refresh(sub)
+
+    if should_notify_feedback:
+        background_tasks.add_task(
+            send_instructor_feedback,
+            user.telegram_chat_id,
+            module.title,
+            next_feedback,
+        )
 
     return _submission_out(sub, user, group, module=module)
 
