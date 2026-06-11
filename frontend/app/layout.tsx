@@ -8,9 +8,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "AI Startup Course",
+  title: "AI Native Startup School",
   description:
-    "AI-guided startup execution course. Go from idea to launch with AI mentors.",
+    "15-week AI-native startup studio where students build an MVP, landing page, content strategy, pitch deck, and product portfolio.",
 };
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="ru" className="h-full">
       <body className="min-h-full antialiased">
         <Providers>{children}</Providers>
       </body>
