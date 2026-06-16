@@ -8,9 +8,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "AI Native Startup School",
+  title: "AI Product Builder",
   description:
-    "15-week AI-native startup studio where students build an MVP, landing page, content strategy, pitch deck, and product portfolio.",
+    "AI-first платформа, которая помогает запустить MVP, лендинг и первых пользователей за 30 дней.",
 };
 
 export default function RootLayout({
