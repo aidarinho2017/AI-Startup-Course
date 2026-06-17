@@ -7,6 +7,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
+from app.content.modules_seed import ACTIVE_MODULE_SLUGS
 from app.db import SessionLocal
 from app.models import Module, StudyGroupDeadline, Submission, TelegramNotification, User
 from app.services.telegram_service import send_deadline_reminder, telegram_enabled
@@ -85,6 +86,7 @@ async def _send_due_reminders(
         .where(
             User.telegram_chat_id.is_not(None),
             User.study_group_id.is_not(None),
+            Module.slug.in_(ACTIVE_MODULE_SLUGS),
             StudyGroupDeadline.due_at > min_due_at,
             StudyGroupDeadline.due_at <= max_due_at,
             Submission.id.is_(None),

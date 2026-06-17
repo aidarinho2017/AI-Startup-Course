@@ -1,4 +1,4 @@
-export type SubmissionFieldType = "text" | "textarea" | "url";
+export type SubmissionFieldType = "text" | "textarea" | "url" | "link_list";
 
 export type SubmissionFieldSpec = {
   key: string;

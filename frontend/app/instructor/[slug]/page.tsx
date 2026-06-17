@@ -4,8 +4,10 @@ import { use, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { getCourseMission } from "@/lib/course";
 import { InstructorSubmission } from "@/lib/types";
 import { InstructorOnly } from "@/components/instructor-only";
+import { SubmissionContent } from "@/components/submission-content";
 import { Topbar } from "@/components/topbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -48,14 +50,7 @@ function SubmissionCard({ sub, moduleSlug }: { sub: InstructorSubmission; module
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2 rounded-md border border-border bg-muted/30 p-4">
-          {Object.entries(sub.content).map(([key, value]) => (
-            <div key={key}>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{key}</p>
-              <p className="mt-0.5 whitespace-pre-wrap text-sm">{value || <span className="italic opacity-50">empty</span>}</p>
-            </div>
-          ))}
-        </div>
+        <SubmissionContent content={sub.content} />
 
         <div className="space-y-2">
           <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
@@ -89,6 +84,7 @@ function SubmissionCard({ sub, moduleSlug }: { sub: InstructorSubmission; module
 }
 
 function ModuleSubmissionsInner({ slug }: { slug: string }) {
+  const mission = getCourseMission(slug);
   const { data, isLoading, error } = useQuery<InstructorSubmission[]>({
     queryKey: ["instructor-submissions", slug],
     queryFn: () => api<InstructorSubmission[]>(`/instructor/modules/${slug}/submissions`),
@@ -102,18 +98,18 @@ function ModuleSubmissionsInner({ slug }: { slug: string }) {
           href="/instructor"
           className="text-xs uppercase tracking-widest text-muted-foreground hover:text-foreground"
         >
-          ← Back to modules
+          ← Back to missions
         </Link>
 
         <h1 className="mt-4 text-2xl font-semibold tracking-tight capitalize">
-          {slug.replace(/-/g, " ")} — Submissions
+          {mission?.title ?? slug.replace(/-/g, " ")} — Submissions
         </h1>
 
         {isLoading && <p className="mt-10 text-sm text-muted-foreground">Loading…</p>}
         {error && <p className="mt-10 text-sm text-destructive">Failed to load submissions.</p>}
 
         {data && data.length === 0 && (
-          <p className="mt-10 text-sm text-muted-foreground">No submissions yet for this module.</p>
+          <p className="mt-10 text-sm text-muted-foreground">No submissions yet for this mission.</p>
         )}
 
         {data && data.length > 0 && (

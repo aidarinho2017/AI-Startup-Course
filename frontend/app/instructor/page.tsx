@@ -12,6 +12,7 @@ import {
   InstructorSubmission,
 } from "@/lib/types";
 import { InstructorOnly } from "@/components/instructor-only";
+import { SubmissionContent } from "@/components/submission-content";
 import { Topbar } from "@/components/topbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +41,7 @@ function InstructorDashboardInner() {
               variant={view === "modules" ? "default" : "outline"}
               onClick={() => setView("modules")}
             >
-              Modules
+              Missions
             </Button>
             <Button
               type="button"
@@ -76,7 +77,7 @@ function ModulesTab() {
   return (
     <section className="mt-8">
       {isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
-      {error && <p className="text-sm text-destructive">Failed to load modules.</p>}
+      {error && <p className="text-sm text-destructive">Failed to load missions.</p>}
 
       {data && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -86,7 +87,7 @@ function ModulesTab() {
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between gap-3">
                     <p className="text-xs uppercase tracking-widest text-muted-foreground">
-                      Module {m.order_index}
+                      Mission {m.order_index}
                     </p>
                     <Badge variant={m.submission_count > 0 ? "default" : "outline"}>
                       {m.submission_count} submission{m.submission_count !== 1 ? "s" : ""}
@@ -230,7 +231,7 @@ function InstructorSubmissionCard({ submission }: { submission: InstructorSubmis
           <div>
             <CardTitle className="text-base">
               {submission.module
-                ? `Module ${submission.module.order_index}: ${submission.module.title}`
+                ? `Mission ${submission.module.order_index}: ${submission.module.title}`
                 : "Submission"}
             </CardTitle>
             <CardDescription>
@@ -241,16 +242,7 @@ function InstructorSubmissionCard({ submission }: { submission: InstructorSubmis
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="space-y-2 rounded-md border border-border bg-muted/30 p-4">
-          {Object.entries(submission.content).map(([key, value]) => (
-            <div key={key}>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{key}</p>
-              <p className="mt-0.5 whitespace-pre-wrap text-sm">
-                {value || <span className="italic opacity-50">empty</span>}
-              </p>
-            </div>
-          ))}
-        </div>
+        <SubmissionContent content={submission.content} />
 
         <div className="space-y-2">
           <Label htmlFor={`feedback-${submission.id}`}>Feedback</Label>
@@ -412,7 +404,7 @@ function GroupCard({ group }: { group: InstructorStudyGroup }) {
     <Card>
       <CardHeader>
         <CardTitle className="text-lg">{group.name}</CardTitle>
-        <CardDescription>{group.deadlines.length} modules</CardDescription>
+        <CardDescription>{group.deadlines.length} missions</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
         <div className="grid gap-4 sm:grid-cols-2">
@@ -442,7 +434,7 @@ function GroupCard({ group }: { group: InstructorStudyGroup }) {
             >
               <div>
                 <p className="text-sm font-medium">
-                  Module {deadline.module_order_index}: {deadline.module_title}
+                  Mission {deadline.module_order_index}: {deadline.module_title}
                 </p>
                 <p className="text-xs text-muted-foreground">{deadline.module_slug}</p>
               </div>

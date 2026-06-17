@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 
+from app.content.modules_seed import ACTIVE_MODULE_SLUGS
 from app.content.prompts import SUMMARY_SCHEMAS
 from app.deps import CurrentUser, DbSession
 from app.models import ChatSummary, Module
@@ -18,7 +19,12 @@ router = APIRouter()
 
 @router.get("/{slug}/chat", response_model=ChatHistoryOut)
 async def get_chat_history(slug: str, user: CurrentUser, db: DbSession) -> ChatHistoryOut:
-    module = await db.scalar(select(Module).where(Module.slug == slug))
+    module = await db.scalar(
+        select(Module).where(
+            Module.slug == slug,
+            Module.slug.in_(ACTIVE_MODULE_SLUGS),
+        )
+    )
     if module is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Module not found")
     if not module.has_chatbot:
@@ -32,7 +38,12 @@ async def get_chat_history(slug: str, user: CurrentUser, db: DbSession) -> ChatH
 
 @router.post("/{slug}/chat")
 async def post_chat(slug: str, body: ChatRequest, user: CurrentUser, db: DbSession):
-    module = await db.scalar(select(Module).where(Module.slug == slug))
+    module = await db.scalar(
+        select(Module).where(
+            Module.slug == slug,
+            Module.slug.in_(ACTIVE_MODULE_SLUGS),
+        )
+    )
     if module is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Module not found")
     if not module.has_chatbot:
@@ -59,7 +70,12 @@ async def post_chat_summary(slug: str, user: CurrentUser, db: DbSession) -> Summ
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This module does not support summaries",
         )
-    module = await db.scalar(select(Module).where(Module.slug == slug))
+    module = await db.scalar(
+        select(Module).where(
+            Module.slug == slug,
+            Module.slug.in_(ACTIVE_MODULE_SLUGS),
+        )
+    )
     if module is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Module not found")
     session = await get_or_create_session(db, user.id, module)
@@ -77,7 +93,12 @@ async def get_chat_summary(slug: str, user: CurrentUser, db: DbSession) -> Summa
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This module does not support summaries",
         )
-    module = await db.scalar(select(Module).where(Module.slug == slug))
+    module = await db.scalar(
+        select(Module).where(
+            Module.slug == slug,
+            Module.slug.in_(ACTIVE_MODULE_SLUGS),
+        )
+    )
     if module is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Module not found")
     session = await get_or_create_session(db, user.id, module)

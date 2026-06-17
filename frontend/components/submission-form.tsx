@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Plus, Trash2 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { Submission, SubmissionFieldSpec } from "@/lib/types";
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+
+function parseLinkListValue(value: string | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (Array.isArray(parsed)) {
+      return parsed.filter((link): link is string => typeof link === "string");
+    }
+  } catch {
+    return [value];
+  }
+  return [];
+}
+
+function serializeLinkListValue(links: string[]): string {
+  return JSON.stringify(links);
+}
 
 export function SubmissionForm({
   slug,
@@ -75,6 +93,13 @@ export function SubmissionForm({
     }
   };
 
+  const updateLinkList = (key: string, links: string[]) => {
+    setValues((current) => ({
+      ...current,
+      [key]: serializeLinkListValue(links),
+    }));
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -82,7 +107,7 @@ export function SubmissionForm({
           <div>
             <CardTitle>Homework</CardTitle>
             <CardDescription>
-              Submit your artifacts to complete this module.
+              Submit your artifact to complete this mission.
             </CardDescription>
           </div>
           {savedAt && <Badge variant="success">Submitted</Badge>}
@@ -101,7 +126,61 @@ export function SubmissionForm({
                     <span className="ml-1 text-destructive">*</span>
                   )}
                 </Label>
-                {f.type === "textarea" ? (
+                {f.type === "link_list" ? (
+                  <div className="space-y-3">
+                    {(() => {
+                      const links = parseLinkListValue(values[f.key]);
+                      const rows = links.length > 0 ? links : [""];
+                      return (
+                        <>
+                          {rows.map((link, index) => (
+                            <div key={`${f.key}-${index}`} className="flex gap-2">
+                              <Input
+                                id={index === 0 ? f.key : undefined}
+                                type="url"
+                                required={
+                                  f.required &&
+                                  index === 0 &&
+                                  rows.every((row) => !row.trim())
+                                }
+                                placeholder={f.placeholder}
+                                value={link}
+                                onChange={(e) => {
+                                  const next = [...rows];
+                                  next[index] = e.target.value;
+                                  updateLinkList(f.key, next);
+                                }}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                className="h-10 w-10 shrink-0 px-0"
+                                aria-label={`Remove ${f.label.toLowerCase()} ${index + 1}`}
+                                onClick={() => {
+                                  const next = rows.filter((_, rowIndex) => rowIndex !== index);
+                                  updateLinkList(f.key, next.length > 0 ? next : [""]);
+                                }}
+                                disabled={rows.length === 1 && !link}
+                              >
+                                <Trash2 className="size-4" aria-hidden="true" />
+                              </Button>
+                            </div>
+                          ))}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => updateLinkList(f.key, [...rows, ""])}
+                          >
+                            <Plus className="size-4" aria-hidden="true" />
+                            Add account
+                          </Button>
+                        </>
+                      );
+                    })()}
+                  </div>
+                ) : f.type === "textarea" ? (
                   <Textarea
                     id={f.key}
                     required={f.required}

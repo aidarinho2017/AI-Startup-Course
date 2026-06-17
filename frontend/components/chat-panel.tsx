@@ -140,7 +140,7 @@ export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQues
         <CardHeader>
           <CardTitle>AI mentor</CardTitle>
           <CardDescription>
-            Specialized for this module. History is saved.
+            Specialized for this mission. History is saved.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -150,7 +150,7 @@ export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQues
           >
             {messages.length === 0 && !streaming && (
               <p className="text-sm text-muted-foreground">
-                {openingQuestion ?? "How can I help you with this module?"}
+                {openingQuestion ?? "How can I help you with this mission?"}
               </p>
             )}
             <div className="space-y-4">

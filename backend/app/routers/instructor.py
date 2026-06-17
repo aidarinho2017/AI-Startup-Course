@@ -3,6 +3,7 @@ import uuid
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from sqlalchemy import func, select
 
+from app.content.modules_seed import ACTIVE_MODULE_SLUGS
 from app.deps import CurrentInstructor, DbSession
 from app.models import Module, StudyGroup, StudyGroupDeadline, Submission, User
 from app.schemas.instructor import (
@@ -27,7 +28,13 @@ router = APIRouter()
 
 @router.get("/modules", response_model=list[InstructorModuleOut])
 async def list_modules(instructor: CurrentInstructor, db: DbSession):
-    modules = (await db.scalars(select(Module).order_by(Module.order_index))).all()
+    modules = (
+        await db.scalars(
+            select(Module)
+            .where(Module.slug.in_(ACTIVE_MODULE_SLUGS))
+            .order_by(Module.order_index)
+        )
+    ).all()
     counts = {
         row.module_id: row.cnt
         for row in (
@@ -49,7 +56,12 @@ async def list_modules(instructor: CurrentInstructor, db: DbSession):
 
 @router.get("/modules/{slug}/submissions", response_model=list[InstructorSubmissionOut])
 async def list_submissions(slug: str, instructor: CurrentInstructor, db: DbSession):
-    module = await db.scalar(select(Module).where(Module.slug == slug))
+    module = await db.scalar(
+        select(Module).where(
+            Module.slug == slug,
+            Module.slug.in_(ACTIVE_MODULE_SLUGS),
+        )
+    )
     if module is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Module not found")
 
@@ -108,7 +120,10 @@ async def list_student_submissions(
         await db.execute(
             select(Submission, Module)
             .join(Module, Module.id == Submission.module_id)
-            .where(Submission.user_id == student.id)
+            .where(
+                Submission.user_id == student.id,
+                Module.slug.in_(ACTIVE_MODULE_SLUGS),
+            )
             .order_by(Module.order_index)
         )
     ).all()
@@ -191,7 +206,9 @@ async def update_group_deadlines(
 
     modules = {
         module.slug: module
-        for module in (await db.scalars(select(Module))).all()
+        for module in (
+            await db.scalars(select(Module).where(Module.slug.in_(ACTIVE_MODULE_SLUGS)))
+        ).all()
     }
     existing = {
         deadline.module_id: deadline
@@ -244,7 +261,10 @@ async def update_feedback(
             .join(User, User.id == Submission.user_id)
             .join(Module, Module.id == Submission.module_id)
             .outerjoin(StudyGroup, StudyGroup.id == User.study_group_id)
-            .where(Submission.id == submission_id)
+            .where(
+                Submission.id == submission_id,
+                Module.slug.in_(ACTIVE_MODULE_SLUGS),
+            )
         )
     ).first()
 
@@ -272,7 +292,13 @@ async def update_feedback(
 
 
 async def _groups_out(db: DbSession, groups: list[StudyGroup]) -> list[InstructorStudyGroupOut]:
-    modules = (await db.scalars(select(Module).order_by(Module.order_index))).all()
+    modules = (
+        await db.scalars(
+            select(Module)
+            .where(Module.slug.in_(ACTIVE_MODULE_SLUGS))
+            .order_by(Module.order_index)
+        )
+    ).all()
     group_ids = [group.id for group in groups]
     deadline_rows = []
     if group_ids:
@@ -309,6 +335,8 @@ async def _student_submission_counts(db: DbSession) -> dict[uuid.UUID, tuple[int
     rows = (
         await db.execute(
             select(Submission.user_id, Submission.is_reviewed)
+            .join(Module, Module.id == Submission.module_id)
+            .where(Module.slug.in_(ACTIVE_MODULE_SLUGS))
         )
     ).all()
     counts: dict[uuid.UUID, tuple[int, int]] = {}
@@ -323,7 +351,12 @@ async def _student_submission_counts(db: DbSession) -> dict[uuid.UUID, tuple[int
 
 
 async def _total_modules(db: DbSession) -> int:
-    return await db.scalar(select(func.count(Module.id))) or 0
+    return (
+        await db.scalar(
+            select(func.count(Module.id)).where(Module.slug.in_(ACTIVE_MODULE_SLUGS))
+        )
+        or 0
+    )
 
 
 def _student_summary_out(

@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import select
 
 from app.config import settings
+from app.content.modules_seed import ACTIVE_MODULE_SLUGS
 from app.db import SessionLocal
 from app.models import (
     Module,
@@ -253,10 +254,24 @@ async def _system_prompt(db, user: User) -> str:
 
 
 async def _course_context(db, user: User) -> str:
-    modules = list((await db.scalars(select(Module).order_by(Module.order_index))).all())
+    modules = list(
+        (
+            await db.scalars(
+                select(Module)
+                .where(Module.slug.in_(ACTIVE_MODULE_SLUGS))
+                .order_by(Module.order_index)
+            )
+        ).all()
+    )
+    module_ids = [module.id for module in modules]
     completed_ids = set(
         (
-            await db.scalars(select(Submission.module_id).where(Submission.user_id == user.id))
+            await db.scalars(
+                select(Submission.module_id).where(
+                    Submission.user_id == user.id,
+                    Submission.module_id.in_(module_ids),
+                )
+            )
         ).all()
     )
     next_module = next((module for module in modules if module.id not in completed_ids), None)
@@ -266,16 +281,16 @@ async def _course_context(db, user: User) -> str:
 
     lines = [
         f"Student: {user.name}",
-        f"Progress: {len(completed_ids)} of {len(modules)} modules completed.",
+        f"Progress: {len(completed_ids)} of {len(modules)} missions completed.",
     ]
     if group:
         lines.append(f"Study group: {group.name}.")
     else:
         lines.append("Study group: not selected.")
     if next_module:
-        lines.append(f"Next incomplete module: Module {next_module.order_index}: {next_module.title}.")
+        lines.append(f"Next incomplete mission: Mission {next_module.order_index}: {next_module.title}.")
     else:
-        lines.append("Next incomplete module: none; all modules are completed.")
+        lines.append("Next incomplete mission: none; all missions are completed.")
 
     if group:
         now = _now()
@@ -284,6 +299,7 @@ async def _course_context(db, user: User) -> str:
                 select(Module, StudyGroupDeadline)
                 .join(StudyGroupDeadline, StudyGroupDeadline.module_id == Module.id)
                 .where(
+                    Module.slug.in_(ACTIVE_MODULE_SLUGS),
                     StudyGroupDeadline.group_id == group.id,
                     StudyGroupDeadline.due_at >= now,
                 )
@@ -295,7 +311,7 @@ async def _course_context(db, user: User) -> str:
             lines.append("Upcoming deadlines:")
             for module, deadline in rows:
                 lines.append(
-                    f"- Module {module.order_index}: {module.title} due {_format_dt(deadline.due_at)}."
+                    f"- Mission {module.order_index}: {module.title} due {_format_dt(deadline.due_at)}."
                 )
         else:
             lines.append("Upcoming deadlines: none set.")

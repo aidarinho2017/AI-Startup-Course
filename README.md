@@ -1,6 +1,6 @@
 # AI Startup Course
 
-A full-stack interactive course platform for aspiring founders. Students watch curated YC videos, chat with a module-specific AI mentor, and submit homework assignments per module.
+A full-stack interactive course platform for aspiring founders. Students follow course missions, chat with a mission-specific AI mentor, and submit artifact links for review.
 
 ## Tech stack
 
@@ -17,7 +17,7 @@ A full-stack interactive course platform for aspiring founders. Students watch c
 .
 ├── backend/
 │   ├── app/
-│   │   ├── content/modules_seed.py   # module & video definitions
+│   │   ├── content/modules_seed.py   # active mission tracking definitions
 │   │   ├── models/                   # SQLAlchemy ORM models
 │   │   ├── routers/                  # FastAPI route handlers
 │   │   ├── schemas/                  # Pydantic schemas
@@ -29,7 +29,7 @@ A full-stack interactive course platform for aspiring founders. Students watch c
 ├── frontend/
 │   ├── app/                          # Next.js app router pages
 │   ├── components/                   # React components
-│   ├── lib/                          # API client, types, utilities
+│   ├── lib/                          # API client, course content, types, utilities
 │   └── .env.local.example            # copy to .env.local and fill in
 └── start.sh                          # boots backend + frontend
 ```
@@ -70,15 +70,17 @@ bash start.sh
 
 Backend runs on `http://localhost:8000`, frontend on `http://localhost:3000`.
 
-## Adding or editing module content
+## Adding or editing course content
 
-Edit `backend/app/content/modules_seed.py`, then re-run the seeder:
+Edit display content such as section copy, resource links, YouTube IDs, and artifact labels in `frontend/lib/course.ts`.
+
+Edit backend tracking definitions such as active mission slugs and submission field validation in `backend/app/content/modules_seed.py`, then re-run the seeder:
 
 ```bash
 cd backend && python -m app.seed
 ```
 
-The seeder is idempotent — it adds new videos and removes ones no longer in the spec without touching user data. Add an optional `due_at` datetime to a module spec to enable Telegram deadline reminders for that module.
+The seeder is idempotent for active missions and does not delete archived module rows or user data. Add an optional `due_at` datetime to a mission spec to enable Telegram deadline reminders for that mission.
 
 ## Telegram setup
 

@@ -7,6 +7,7 @@ from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Request, 
 from sqlalchemy import select
 
 from app.config import settings
+from app.content.modules_seed import ACTIVE_MODULE_SLUGS
 from app.deps import CurrentUser, DbSession
 from app.models import Module, StudyGroup, StudyGroupDeadline, Submission, User
 from app.schemas.telegram import TelegramLinkCodeOut, TelegramStatusOut
@@ -192,23 +193,35 @@ async def _help_message(db: DbSession, chat_id: str) -> str:
         "Commands:\n"
         "/status - show course progress\n"
         "/deadlines - show upcoming deadlines\n"
-        "/next - show your next module\n"
+        "/next - show your next mission\n"
         "/unlink - unlink this Telegram chat\n"
         "/help - show commands"
     )
 
 
 async def _progress_message(db: DbSession, user: User) -> str:
-    modules = (await db.scalars(select(Module).order_by(Module.order_index))).all()
+    modules = (
+        await db.scalars(
+            select(Module)
+            .where(Module.slug.in_(ACTIVE_MODULE_SLUGS))
+            .order_by(Module.order_index)
+        )
+    ).all()
+    module_ids = [module.id for module in modules]
     completed_ids = set(
         (
-            await db.scalars(select(Submission.module_id).where(Submission.user_id == user.id))
+            await db.scalars(
+                select(Submission.module_id).where(
+                    Submission.user_id == user.id,
+                    Submission.module_id.in_(module_ids),
+                )
+            )
         ).all()
     )
     group = await _study_group(db, user)
     lines = [
         "Course status",
-        f"Progress: {len(completed_ids)} of {len(modules)} modules completed.",
+        f"Progress: {len(completed_ids)} of {len(modules)} missions completed.",
     ]
     if group:
         lines.append(f"Study group: {group.name}")
@@ -228,6 +241,7 @@ async def _deadlines_message(db: DbSession, user: User) -> str:
             select(Module, StudyGroupDeadline)
             .join(StudyGroupDeadline, StudyGroupDeadline.module_id == Module.id)
             .where(
+                Module.slug.in_(ACTIVE_MODULE_SLUGS),
                 StudyGroupDeadline.group_id == group.id,
                 StudyGroupDeadline.due_at >= now,
             )
@@ -240,24 +254,36 @@ async def _deadlines_message(db: DbSession, user: User) -> str:
 
     lines = [f"Upcoming deadlines for {group.name}:"]
     for module, deadline in rows:
-        lines.append(f"- Module {module.order_index}: {module.title} - {_format_dt(deadline.due_at)}")
+        lines.append(f"- Mission {module.order_index}: {module.title} - {_format_dt(deadline.due_at)}")
     return "\n".join(lines)
 
 
 async def _next_module_message(db: DbSession, user: User) -> str:
-    modules = (await db.scalars(select(Module).order_by(Module.order_index))).all()
+    modules = (
+        await db.scalars(
+            select(Module)
+            .where(Module.slug.in_(ACTIVE_MODULE_SLUGS))
+            .order_by(Module.order_index)
+        )
+    ).all()
+    module_ids = [module.id for module in modules]
     completed_ids = set(
         (
-            await db.scalars(select(Submission.module_id).where(Submission.user_id == user.id))
+            await db.scalars(
+                select(Submission.module_id).where(
+                    Submission.user_id == user.id,
+                    Submission.module_id.in_(module_ids),
+                )
+            )
         ).all()
     )
     next_module = next((module for module in modules if module.id not in completed_ids), None)
     if next_module is None:
-        return "All modules are completed."
+        return "All missions are completed."
 
     lines = [
-        "Next module",
-        f"Module {next_module.order_index}: {next_module.title}",
+        "Next mission",
+        f"Mission {next_module.order_index}: {next_module.title}",
     ]
     if user.study_group_id is not None:
         deadline = await db.scalar(

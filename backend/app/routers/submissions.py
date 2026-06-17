@@ -1,7 +1,9 @@
+import json
+
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from sqlalchemy import select
 
-from app.content.modules_seed import MODULES
+from app.content.modules_seed import ACTIVE_MODULE_SLUGS, MODULES
 from app.deps import CurrentUser, DbSession
 from app.models import Module, Submission
 from app.schemas.submissions import SubmissionIn, SubmissionOut
@@ -26,6 +28,40 @@ def _validate_submission(slug: str, content: dict) -> dict:
                 detail=f"Field '{key}' must be a string",
             )
         value = value.strip()
+        if field["type"] == "link_list":
+            try:
+                links = json.loads(value) if value else []
+            except json.JSONDecodeError as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Field '{field['label']}' must be a valid list of links",
+                ) from exc
+            if not isinstance(links, list) or not all(isinstance(link, str) for link in links):
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Field '{field['label']}' must be a valid list of links",
+                )
+            cleaned_links = [link.strip() for link in links if link.strip()]
+            if field.get("required") and not cleaned_links:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Field '{field['label']}' is required",
+                )
+            invalid_link = next(
+                (
+                    link
+                    for link in cleaned_links
+                    if not (link.startswith("http://") or link.startswith("https://"))
+                ),
+                None,
+            )
+            if invalid_link is not None:
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail=f"Field '{field['label']}' must contain valid URLs",
+                )
+            cleaned[key] = json.dumps(cleaned_links)
+            continue
         if field.get("required") and not value:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -44,7 +80,12 @@ def _validate_submission(slug: str, content: dict) -> dict:
 
 @router.get("/{slug}/submission", response_model=SubmissionOut)
 async def get_submission(slug: str, user: CurrentUser, db: DbSession) -> SubmissionOut:
-    module = await db.scalar(select(Module).where(Module.slug == slug))
+    module = await db.scalar(
+        select(Module).where(
+            Module.slug == slug,
+            Module.slug.in_(ACTIVE_MODULE_SLUGS),
+        )
+    )
     if module is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Module not found")
     sub = await db.scalar(
@@ -65,7 +106,12 @@ async def upsert_submission(
     db: DbSession,
     background_tasks: BackgroundTasks,
 ) -> SubmissionOut:
-    module = await db.scalar(select(Module).where(Module.slug == slug))
+    module = await db.scalar(
+        select(Module).where(
+            Module.slug == slug,
+            Module.slug.in_(ACTIVE_MODULE_SLUGS),
+        )
+    )
     if module is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Module not found")
     cleaned = _validate_submission(slug, body.content)

@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from sqlalchemy import select
 
+from app.content.modules_seed import ACTIVE_MODULE_SLUGS
 from app.deps import CurrentUser, DbSession
 from app.models import Module, Submission
 from app.schemas.modules import DashboardOut, ModuleListOut
@@ -11,7 +12,13 @@ router = APIRouter()
 
 @router.get("", response_model=DashboardOut)
 async def dashboard(user: CurrentUser, db: DbSession) -> DashboardOut:
-    modules = (await db.scalars(select(Module).order_by(Module.order_index))).all()
+    modules = (
+        await db.scalars(
+            select(Module)
+            .where(Module.slug.in_(ACTIVE_MODULE_SLUGS))
+            .order_by(Module.order_index)
+        )
+    ).all()
     deadlines = await deadline_map_for_user(db, user, [module.id for module in modules])
     completed_ids = set(
         (

@@ -1,11 +1,9 @@
-"""Seed definitions for the 6 course modules.
+"""Active course mission definitions used by backend tracking.
 
-The frontend `SubmissionForm` reads `submission_fields` from the module detail
-endpoint to render module-specific inputs. The backend validates the submitted
-JSON against the same shape.
-
-YouTube IDs are placeholders — the user can swap them at any time by editing
-this file and re-running `python -m app.seed`.
+Static lesson display content such as resource links, YouTube titles, and page
+copy lives in the frontend. The backend keeps only the mission records and
+submission validation shape needed for progress, deadlines, instructor review,
+Telegram, and AI mentor chat.
 """
 
 from datetime import datetime
@@ -15,7 +13,7 @@ from typing import NotRequired, TypedDict
 class FieldSpec(TypedDict, total=False):
     key: str
     label: str
-    type: str  # "text" | "textarea" | "url"
+    type: str  # "text" | "textarea" | "url" | "link_list"
     required: bool
     placeholder: str
 
@@ -38,168 +36,118 @@ class ModuleSpec(TypedDict):
 
 MODULES: list[ModuleSpec] = [
     {
-        "slug": "deciding-to-start",
-        "title": "Deciding to Start",
-        "description": "Evaluate founder readiness and confront the reality of starting a startup.",
+        "slug": "build-simple",
+        "title": "Mission 1 - Start with Simple",
+        "description": "Use Lovable to build anything simple and submit your project link.",
         "order_index": 1,
         "has_chatbot": True,
-        "videos": [
-            {"youtube_id": "CBYhVcO4WgI", "title": "How to Start a Startup — Sam Altman"},
-            {"youtube_id": "ii1jcLg-eIQ", "title": "Before the Startup — Paul Graham"},
-        ],
+        "videos": [],
         "submission_fields": [
             {
-                "key": "goals",
-                "label": "Startup goals",
-                "type": "textarea",
-                "required": True,
-                "placeholder": "What do you want to build, and what does success look like in 12 months?",
-            },
-            {
-                "key": "weekly_hours",
-                "label": "Weekly time commitment",
-                "type": "text",
-                "required": True,
-                "placeholder": "e.g. 15 hours/week",
-            },
-            {
-                "key": "why",
-                "label": "Why you want to build a startup",
-                "type": "textarea",
-                "required": True,
-                "placeholder": "Be specific. Why now? Why you?",
-            },
-        ],
-    },
-    {
-        "slug": "startup-ideas",
-        "title": "Startup Ideas",
-        "description": "Generate, validate, and pressure-test your startup idea.",
-        "order_index": 2,
-        "has_chatbot": True,
-        "videos": [
-            {"youtube_id": "Th8JoIan4dg", "title": "How to Get Startup Ideas — Paul Graham"},
-            {"youtube_id": "DOtCl5PU8F0", "title": "How to Evaluate Startup Ideas — Kevin Hale"},
-        ],
-        "submission_fields": [
-            {
-                "key": "idea",
-                "label": "Startup idea",
-                "type": "textarea",
-                "required": True,
-                "placeholder": "One paragraph: what is it, who is it for, what problem does it solve?",
-            },
-            {
-                "key": "icp",
-                "label": "Ideal customer profile (ICP)",
-                "type": "textarea",
-                "required": True,
-                "placeholder": "Be specific: role, company size, current behavior, where to find them.",
-            },
-            {
-                "key": "competitors",
-                "label": "Competitor analysis",
-                "type": "textarea",
-                "required": True,
-                "placeholder": "Who solves this today? What do they get right and wrong?",
-            },
-            {
-                "key": "interviews",
-                "label": "Customer interview summaries",
-                "type": "textarea",
-                "required": True,
-                "placeholder": "Who did you talk to? What did you learn?",
-            },
-            {
-                "key": "landing_page_url",
-                "label": "Landing page URL (optional)",
+                "key": "lovable_url",
+                "label": "Lovable link",
                 "type": "url",
-                "required": False,
+                "required": True,
                 "placeholder": "https://...",
             },
         ],
     },
     {
-        "slug": "founding-team",
-        "title": "Founding Team",
-        "description": "Find your role and build a balanced team of cofounders.",
-        "order_index": 3,
+        "slug": "build-vibe-coding",
+        "title": "Mission 2 - Learn Vibe Coding",
+        "description": "Learn what vibe coding is, then create or improve a no-code website.",
+        "order_index": 2,
         "has_chatbot": True,
-        "videos": [
-            {"youtube_id": "Fk9BCr5pLTU", "title": "How To Find A Co-Founder — YC"},
-            {"youtube_id": "dlfjs_eEEzs", "title": "Co-Founder Mistakes That Kill Companies & How To Avoid Them — YC"},
-        ],
+        "videos": [],
         "submission_fields": [
             {
-                "key": "team_presentation_url",
-                "label": "Team presentation URL",
+                "key": "website_url",
+                "label": "Website link",
                 "type": "url",
                 "required": True,
-                "placeholder": "Link to a deck or doc with team photos, skills, achievements, and roles.",
+                "placeholder": "https://...",
             },
         ],
     },
     {
-        "slug": "mvp-building",
-        "title": "MVP Building",
-        "description": "Build a minimum viable product using modern AI tools.",
-        "order_index": 4,
+        "slug": "build-real-vibe-coding",
+        "title": "Mission 3 - Learn Real Vibe Coding",
+        "description": "Choose one coding-agent tutorial and submit a GitHub repo with code.",
+        "order_index": 3,
         "has_chatbot": True,
-        "videos": [
-            {"youtube_id": "QRZ_l7cVzzU", "title": "How to Build an MVP — YC"},
-        ],
+        "videos": [],
         "submission_fields": [
             {
-                "key": "mvp_url",
-                "label": "MVP URL",
-                "type": "url",
-                "required": True,
-                "placeholder": "https://your-mvp.vercel.app",
-            },
-            {
-                "key": "repo_url",
-                "label": "GitHub repository URL",
+                "key": "github_url",
+                "label": "GitHub link with code",
                 "type": "url",
                 "required": True,
                 "placeholder": "https://github.com/...",
             },
+        ],
+    },
+    {
+        "slug": "discover-find-problem",
+        "title": "Mission 4 - Find the Problem",
+        "description": "Identify real problems around you and connect each problem to a possible solution.",
+        "order_index": 4,
+        "has_chatbot": True,
+        "videos": [],
+        "submission_fields": [
             {
-                "key": "explanation",
-                "label": "Short product explanation",
+                "key": "problems_and_solutions",
+                "label": "Problems and solutions",
                 "type": "textarea",
                 "required": True,
-                "placeholder": "What does it do, who is it for, what's next?",
+                "placeholder": "Write 5 existing problems you have and 5 solutions for how you would solve them.",
             },
         ],
     },
     {
-        "slug": "launch",
-        "title": "Launch",
-        "description": "Launch your product publicly and get your first users.",
+        "slug": "discover-talk-to-people",
+        "title": "Mission 5 - Talk to People",
+        "description": "Get out of the building and learn from real conversations.",
         "order_index": 5,
-        "has_chatbot": False,
-        "videos": [
-            {"youtube_id": "u36A-YTxiOw", "title": "How to Launch — YC"},
-            {"youtube_id": "hyYCn_kAngI", "title": "How to get your first users"},
-        ],
+        "has_chatbot": True,
+        "videos": [],
         "submission_fields": [
             {
-                "key": "launch_plan",
-                "label": "Launch plan",
+                "key": "conversation_insights",
+                "label": "Conversation insights",
                 "type": "textarea",
                 "required": True,
-                "placeholder": "Channels, timing, target audience, goals.",
+                "placeholder": "Write 5 insights about who you talked to and what they told you.",
             },
+        ],
+    },
+    {
+        "slug": "discover-evaluate-ideas",
+        "title": "Mission 6 - Find and Evaluate Your Startup Ideas",
+        "description": "Turn problems and conversations into ambitious startup ideas.",
+        "order_index": 6,
+        "has_chatbot": True,
+        "videos": [],
+        "submission_fields": [
             {
-                "key": "launch_post",
-                "label": "Launch post copy",
+                "key": "startup_ideas",
+                "label": "Startup ideas",
                 "type": "textarea",
                 "required": True,
-                "placeholder": "The text you will post on social / Product Hunt.",
+                "placeholder": "Write down your 5 most ambitious startup ideas.",
             },
+        ],
+    },
+    {
+        "slug": "launch-build-mvp",
+        "title": "Mission 7 - Build an MVP",
+        "description": "Build a minimum viable product that can test your product hypotheses.",
+        "order_index": 7,
+        "has_chatbot": True,
+        "videos": [],
+        "submission_fields": [
             {
-                "key": "landing_page_url",
-                "label": "Landing page URL",
+                "key": "mvp_url",
+                "label": "MVP link",
                 "type": "url",
                 "required": True,
                 "placeholder": "https://...",
@@ -207,37 +155,39 @@ MODULES: list[ModuleSpec] = [
         ],
     },
     {
-        "slug": "growth-monetization",
-        "title": "Growth & Monetization",
-        "description": "Grow your product and figure out how it makes money.",
-        "order_index": 6,
+        "slug": "launch-product-online",
+        "title": "Mission 8 - Launch Your Product Online",
+        "description": "Let everyone know what you are building by posting about your product online.",
+        "order_index": 8,
         "has_chatbot": True,
-        "videos": [
-            {"youtube_id": "n_yHZ_vKjno", "title": "Growth — YC"},
-            {"youtube_id": "URiIsrdplbo", "title": "Pricing and Monetization"},
-        ],
+        "videos": [],
         "submission_fields": [
             {
-                "key": "monetization",
-                "label": "Monetization strategy",
-                "type": "textarea",
+                "key": "social_account_links",
+                "label": "Social account links",
+                "type": "link_list",
                 "required": True,
-                "placeholder": "Model, price points, why it fits your customer.",
+                "placeholder": "https://...",
             },
+        ],
+    },
+    {
+        "slug": "launch-first-customers",
+        "title": "Mission 9 - How to Get Your First Customers",
+        "description": "Describe who you are selling to and how you plan to reach your first customers.",
+        "order_index": 9,
+        "has_chatbot": True,
+        "videos": [],
+        "submission_fields": [
             {
-                "key": "growth_experiments",
-                "label": "Growth experiment ideas",
+                "key": "customer_plan",
+                "label": "Customer and sales plan",
                 "type": "textarea",
                 "required": True,
-                "placeholder": "List 3 experiments with hypotheses and success metrics.",
-            },
-            {
-                "key": "retention",
-                "label": "Retention ideas",
-                "type": "textarea",
-                "required": True,
-                "placeholder": "What brings users back? How will you measure it?",
+                "placeholder": "Describe your customers, who you are selling to, and how you plan to sell.",
             },
         ],
     },
 ]
+
+ACTIVE_MODULE_SLUGS: tuple[str, ...] = tuple(module["slug"] for module in MODULES)
