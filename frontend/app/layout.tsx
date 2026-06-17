@@ -10,7 +10,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "AI Product Builder",
   description:
-    "AI-first платформа, которая помогает запустить MVP, лендинг и первых пользователей за 30 дней.",
+    "AI-first platform for launching an MVP, landing page, and first users in 30 days.",
 };
 
 export default function RootLayout({
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ru" className="h-full">
+    <html lang="en" className="h-full">
       <body className="min-h-full antialiased">
         <Providers>{children}</Providers>
       </body>
