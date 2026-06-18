@@ -38,6 +38,8 @@ type ProductItem = {
 type AudienceCard = ProductItem & {
   caption: string;
   accent: Accent;
+  ctaHref: string;
+  ctaLabel: string;
 };
 
 type LandingCopy = {
@@ -83,7 +85,6 @@ type LandingCopy = {
     eyebrow: string;
     title: string;
     description: string;
-    cta: string;
     cards: AudienceCard[];
   };
   finalCta: {
@@ -214,7 +215,6 @@ const landingCopy: Record<Locale, LandingCopy> = {
       title: "One product workflow. Three launch formats.",
       description:
         "Start with the product and outcome. Choose the format for a team, university, or company.",
-      cta: "Discuss a launch",
       cards: [
         {
           title: "Launch",
@@ -222,6 +222,8 @@ const landingCopy: Record<Locale, LandingCopy> = {
           caption: "For founders and teams",
           icon: Rocket,
           accent: "emerald",
+          ctaHref: "/login",
+          ctaLabel: "Start",
         },
         {
           title: "University",
@@ -229,6 +231,8 @@ const landingCopy: Record<Locale, LandingCopy> = {
           caption: "For universities and innovation labs",
           icon: Building2,
           accent: "cyan",
+          ctaHref: "https://t.me/aidarissakhanov",
+          ctaLabel: "Discuss University plan",
         },
         {
           title: "Enterprise",
@@ -236,6 +240,8 @@ const landingCopy: Record<Locale, LandingCopy> = {
           caption: "For companies",
           icon: TrendingUp,
           accent: "amber",
+          ctaHref: "https://t.me/aidarissakhanov",
+          ctaLabel: "Discuss Enterprise plan",
         },
       ],
     },
@@ -363,7 +369,6 @@ const landingCopy: Record<Locale, LandingCopy> = {
       title: "Один продуктовый workflow. Три формата запуска.",
       description:
         "Сначала продукт и результат. Формат выбирается под команду, университет или компанию.",
-      cta: "Обсудить запуск",
       cards: [
         {
           title: "Launch",
@@ -371,6 +376,8 @@ const landingCopy: Record<Locale, LandingCopy> = {
           caption: "Для фаундеров и команд",
           icon: Rocket,
           accent: "emerald",
+          ctaHref: "/login",
+          ctaLabel: "Начать",
         },
         {
           title: "University",
@@ -378,6 +385,8 @@ const landingCopy: Record<Locale, LandingCopy> = {
           caption: "Для университетов и innovation labs",
           icon: Building2,
           accent: "cyan",
+          ctaHref: "https://t.me/aidarissakhanov",
+          ctaLabel: "Обсудить University plan",
         },
         {
           title: "Enterprise",
@@ -385,6 +394,8 @@ const landingCopy: Record<Locale, LandingCopy> = {
           caption: "Для компаний",
           icon: TrendingUp,
           accent: "amber",
+          ctaHref: "https://t.me/aidarissakhanov",
+          ctaLabel: "Обсудить Enterprise plan",
         },
       ],
     },
@@ -765,67 +776,72 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           />
 
           <div className="mt-14 grid gap-4 lg:grid-cols-3">
-            {copy.audience.cards.map((card) => (
-              <div
-                key={card.title}
-                className="group relative min-h-[300px] overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-white/[0.07]"
-              >
+            {copy.audience.cards.map((card) => {
+              const isExternalCta = card.ctaHref.startsWith("http");
+
+              return (
                 <div
-                  className={`absolute inset-x-0 top-0 h-px ${
-                    card.accent === "emerald"
-                      ? "bg-emerald-300"
-                      : card.accent === "cyan"
-                        ? "bg-cyan-300"
-                        : "bg-amber-300"
-                  } opacity-70`}
-                />
-                <div
-                  className={`mb-10 flex size-12 items-center justify-center rounded-[8px] border ${
-                    card.accent === "emerald"
-                      ? "border-emerald-300/20 bg-emerald-300/10 text-emerald-200"
-                      : card.accent === "cyan"
-                        ? "border-cyan-300/20 bg-cyan-300/10 text-cyan-200"
-                        : "border-amber-300/20 bg-amber-300/10 text-amber-200"
-                  }`}
+                  key={card.title}
+                  className="group relative min-h-[300px] overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.04] p-6 transition duration-300 hover:-translate-y-1 hover:border-white/25 hover:bg-white/[0.07]"
                 >
-                  <card.icon className="size-6" aria-hidden="true" />
+                  <div
+                    className={`absolute inset-x-0 top-0 h-px ${
+                      card.accent === "emerald"
+                        ? "bg-emerald-300"
+                        : card.accent === "cyan"
+                          ? "bg-cyan-300"
+                          : "bg-amber-300"
+                    } opacity-70`}
+                  />
+                  <div
+                    className={`mb-10 flex size-12 items-center justify-center rounded-[8px] border ${
+                      card.accent === "emerald"
+                        ? "border-emerald-300/20 bg-emerald-300/10 text-emerald-200"
+                        : card.accent === "cyan"
+                          ? "border-cyan-300/20 bg-cyan-300/10 text-cyan-200"
+                          : "border-amber-300/20 bg-amber-300/10 text-amber-200"
+                    }`}
+                  >
+                    <card.icon className="size-6" aria-hidden="true" />
+                  </div>
+                  <p className="text-sm font-medium text-zinc-500">{card.caption}</p>
+                  <h3 className="mt-4 text-3xl font-semibold text-white">{card.title}</h3>
+                  <p className="mt-5 text-base leading-7 text-zinc-300">{card.description}</p>
+                  <Link
+                    href={card.ctaHref}
+                    target={isExternalCta ? "_blank" : undefined}
+                    rel={isExternalCta ? "noreferrer" : undefined}
+                    className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-white transition hover:text-emerald-200"
+                  >
+                    {card.ctaLabel}
+                    <ArrowRight className="size-4" aria-hidden="true" />
+                  </Link>
                 </div>
-                <p className="text-sm font-medium text-zinc-500">{card.caption}</p>
-                <h3 className="mt-4 text-3xl font-semibold text-white">{card.title}</h3>
-                <p className="mt-5 text-base leading-7 text-zinc-300">{card.description}</p>
-                <Link
-                  href="https://t.me/aidarissakhanov"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-white transition hover:text-emerald-200"
-                >
-                  {copy.audience.cta}
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <section id="launch" className="relative flex min-h-[78vh] items-center overflow-hidden bg-white px-5 py-24 text-black md:px-8">
-        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08),rgba(0,0,0,0))]" />
+      <section id="launch" className="relative flex min-h-[78vh] items-center overflow-hidden border-b border-white/10 bg-[#050505] px-5 py-24 text-white md:px-8">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(52,211,153,0.16),transparent_34%),linear-gradient(180deg,#0a0a0a_0%,#050505_76%)]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(52,211,153,0.6),rgba(34,211,238,0.5),transparent)]" />
         <div className="relative mx-auto max-w-5xl text-center">
-          <p className="mb-5 text-sm font-semibold text-zinc-600">{copy.finalCta.eyebrow}</p>
-          <h2 className="text-4xl font-semibold leading-[1.04] md:text-7xl">
+          <p className="mb-5 text-sm font-semibold text-emerald-300">{copy.finalCta.eyebrow}</p>
+          <h2 className="text-4xl font-semibold leading-[1.04] text-white md:text-7xl">
             {copy.finalCta.titleLines.map((line) => (
               <span key={line} className="block">
                 {line}
               </span>
             ))}
           </h2>
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-600 md:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-zinc-400 md:text-xl">
             {copy.finalCta.description}
           </p>
           <div className="mt-9 flex justify-center">
             <Link
               href="/signup"
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[8px] bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-zinc-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/30"
+              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[8px] bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
             >
               <Rocket className="size-4" aria-hidden="true" />
               {copy.finalCta.cta}
