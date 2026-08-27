@@ -22,6 +22,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 type View = "modules" | "students" | "groups";
+const COURSE_LABEL = { en: "English Course", ru: "Russian Course" } as const;
+const courseIdForSlug = (slug: string) => slug.startsWith("ru-") ? "ru" : "en";
 
 function InstructorDashboardInner() {
   const [view, setView] = useState<View>("modules");
@@ -80,24 +82,27 @@ function ModulesTab() {
       {error && <p className="text-sm text-destructive">Failed to load missions.</p>}
 
       {data && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data.map((m) => (
-            <Link key={m.slug} href={`/instructor/${m.slug}`}>
-              <Card className="h-full cursor-pointer transition-colors hover:border-foreground/30">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs uppercase tracking-widest text-muted-foreground">
-                      Mission {m.order_index}
-                    </p>
-                    <Badge variant={m.submission_count > 0 ? "default" : "outline"}>
-                      {m.submission_count} submission{m.submission_count !== 1 ? "s" : ""}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-base">{m.title}</CardTitle>
-                </CardHeader>
-                <CardContent />
-              </Card>
-            </Link>
+        <div className="space-y-8">
+          {(["en", "ru"] as const).map((courseId) => (
+            <div key={courseId}>
+              <h2 className="mb-3 text-lg font-semibold">{COURSE_LABEL[courseId]}</h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {data.filter((module) => courseIdForSlug(module.slug) === courseId).map((m) => (
+                  <Link key={m.slug} href={`/instructor/${m.slug}`}>
+                    <Card className="h-full cursor-pointer transition-colors hover:border-foreground/30">
+                      <CardHeader className="pb-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-xs uppercase tracking-widest text-muted-foreground">Mission {m.order_index}</p>
+                          <Badge variant={m.submission_count > 0 ? "default" : "outline"}>{m.submission_count} submission{m.submission_count !== 1 ? "s" : ""}</Badge>
+                        </div>
+                        <CardTitle className="text-base">{m.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent />
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -134,7 +139,9 @@ function StudentsTab() {
               {activeStudentId === student.id && <Badge>Open</Badge>}
             </div>
             <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
-              <span>{student.completed_count} / {student.total_modules} completed</span>
+              {student.course_progress.map((progress) => (
+                <span key={progress.course_id}>{progress.course_id.toUpperCase()}: {progress.completed_count} / {progress.total_modules}</span>
+              ))}
               <span>{student.unreviewed_count} unreviewed</span>
               {student.study_group && <span>{student.study_group.name}</span>}
             </div>
@@ -183,6 +190,11 @@ function StudentDetail({ studentId }: { studentId: string | null }) {
         {data.student.dream && (
           <p className="mt-4 whitespace-pre-wrap text-sm">{data.student.dream}</p>
         )}
+        <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
+          {data.student.course_progress.map((progress) => (
+            <Badge key={progress.course_id} variant="outline">{COURSE_LABEL[progress.course_id]}: {progress.completed_count} / {progress.total_modules}</Badge>
+          ))}
+        </div>
       </div>
 
       {data.submissions.length === 0 ? (
@@ -234,6 +246,7 @@ function InstructorSubmissionCard({ submission }: { submission: InstructorSubmis
                 ? `Mission ${submission.module.order_index}: ${submission.module.title}`
                 : "Submission"}
             </CardTitle>
+            {submission.module && <Badge variant="outline">{COURSE_LABEL[courseIdForSlug(submission.module.slug)]}</Badge>}
             <CardDescription>
               Submitted {new Date(submission.submitted_at).toLocaleString()}
             </CardDescription>
@@ -433,6 +446,7 @@ function GroupCard({ group }: { group: InstructorStudyGroup }) {
               className="grid gap-2 rounded-md border border-border p-3 sm:grid-cols-[1fr_15rem]"
             >
               <div>
+                <Badge variant="outline" className="mb-2">{COURSE_LABEL[courseIdForSlug(deadline.module_slug)]}</Badge>
                 <p className="text-sm font-medium">
                   Mission {deadline.module_order_index}: {deadline.module_title}
                 </p>

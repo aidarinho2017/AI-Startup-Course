@@ -3,12 +3,17 @@ import uuid
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from sqlalchemy import func, select
 
-from app.content.modules_seed import ACTIVE_MODULE_SLUGS
+from app.content.modules_seed import (
+    ACTIVE_MODULE_SLUGS,
+    COURSE_MODULE_SLUGS,
+    course_id_for_slug,
+)
 from app.deps import CurrentInstructor, DbSession
 from app.models import Module, StudyGroup, StudyGroupDeadline, Submission, User
 from app.schemas.instructor import (
     FeedbackIn,
     GroupDeadlinesUpdateIn,
+    InstructorCourseProgressOut,
     InstructorGroupDeadlineOut,
     InstructorModuleBriefOut,
     InstructorModuleOut,
@@ -94,7 +99,7 @@ async def list_students(instructor: CurrentInstructor, db: DbSession) -> list[In
         )
     ).all()
     return [
-        _student_summary_out(user, group, counts.get(user.id, (0, 0)), total_modules)
+        _student_summary_out(user, group, counts.get(user.id, {}), total_modules)
         for user, group in rows
     ]
 
@@ -131,7 +136,7 @@ async def list_student_submissions(
     counts = await _student_submission_counts(db)
     total_modules = await _total_modules(db)
     return InstructorStudentSubmissionsOut(
-        student=_student_summary_out(student, group, counts.get(student.id, (0, 0)), total_modules),
+        student=_student_summary_out(student, group, counts.get(student.id, {}), total_modules),
         submissions=[
             _submission_out(sub, student, group, module=module)
             for sub, module in rows
@@ -331,22 +336,26 @@ async def _groups_out(db: DbSession, groups: list[StudyGroup]) -> list[Instructo
     ]
 
 
-async def _student_submission_counts(db: DbSession) -> dict[uuid.UUID, tuple[int, int]]:
+async def _student_submission_counts(
+    db: DbSession,
+) -> dict[uuid.UUID, dict[str, tuple[int, int]]]:
     rows = (
         await db.execute(
-            select(Submission.user_id, Submission.is_reviewed)
+            select(Submission.user_id, Submission.is_reviewed, Module.slug)
             .join(Module, Module.id == Submission.module_id)
             .where(Module.slug.in_(ACTIVE_MODULE_SLUGS))
         )
     ).all()
-    counts: dict[uuid.UUID, tuple[int, int]] = {}
-    for user_id, is_reviewed in rows:
-        reviewed, unreviewed = counts.get(user_id, (0, 0))
+    counts: dict[uuid.UUID, dict[str, tuple[int, int]]] = {}
+    for user_id, is_reviewed, slug in rows:
+        course_id = course_id_for_slug(slug)
+        by_course = counts.setdefault(user_id, {})
+        reviewed, unreviewed = by_course.get(course_id, (0, 0))
         if is_reviewed:
             reviewed += 1
         else:
             unreviewed += 1
-        counts[user_id] = (reviewed, unreviewed)
+        by_course[course_id] = (reviewed, unreviewed)
     return counts
 
 
@@ -362,10 +371,23 @@ async def _total_modules(db: DbSession) -> int:
 def _student_summary_out(
     user: User,
     group: StudyGroup | None,
-    counts: tuple[int, int],
+    counts: dict[str, tuple[int, int]],
     total_modules: int,
 ) -> InstructorStudentOut:
-    reviewed, unreviewed = counts
+    course_progress = []
+    for course_id, slugs in COURSE_MODULE_SLUGS.items():
+        reviewed, unreviewed = counts.get(course_id, (0, 0))
+        course_progress.append(
+            InstructorCourseProgressOut(
+                course_id=course_id,
+                completed_count=reviewed + unreviewed,
+                reviewed_count=reviewed,
+                unreviewed_count=unreviewed,
+                total_modules=len(slugs),
+            )
+        )
+    reviewed = sum(progress.reviewed_count for progress in course_progress)
+    unreviewed = sum(progress.unreviewed_count for progress in course_progress)
     submission_count = reviewed + unreviewed
     return InstructorStudentOut(
         id=user.id,
@@ -380,6 +402,7 @@ def _student_summary_out(
         unreviewed_count=unreviewed,
         submission_count=submission_count,
         total_modules=total_modules,
+        course_progress=course_progress,
     )
 
 

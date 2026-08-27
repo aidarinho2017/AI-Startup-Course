@@ -13,7 +13,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { api } from "@/lib/api";
-import { COURSE_MISSIONS, getCourseMission, getMissionSection } from "@/lib/course";
+import { CourseId, getCourseMission, getMissionCourse, getMissionSection } from "@/lib/course";
 import { ModuleDetail } from "@/lib/types";
 import { Protected } from "@/components/protected";
 import { Topbar } from "@/components/topbar";
@@ -43,7 +43,25 @@ const MENTOR_QUESTIONS: Record<string, string> = {
     "Who is your first customer segment, and what is your first practical sales step?",
 };
 
-function MissingMission() {
+const RUSSIAN_MENTOR_QUESTIONS: Record<string, string> = {
+  "build-simple": "Что вы хотите создать в Lovable и какую самую маленькую версию можно опубликовать сегодня?",
+  "build-vibe-coding": "Какой сайт вы создаёте или улучшаете и что посетитель должен уметь на нём делать?",
+  "build-real-vibe-coding": "Какой инструмент вы выбрали и какой результат отправите в GitHub?",
+  "discover-find-problem": "Какие проблемы вы часто замечаете и за решение какой из них люди могли бы заплатить?",
+  "discover-talk-to-people": "С кем вы поговорили первым и что удивило вас в описании проблемы?",
+  "discover-evaluate-ideas": "Какая идея самая амбициозная и какую реальную проблему она решает?",
+  "launch-build-mvp": "Какую гипотезу проверит ваш MVP и какую минимальную полезную версию можно запустить?",
+  "launch-product-online": "Где вы впервые расскажете о продукте и какие ссылки покажут публикации?",
+  "launch-first-customers": "Кто ваши первые клиенты и какой первый практический шаг продаж вы сделаете?",
+};
+
+const COPY = {
+  en: { back: "Back to course", missing: "Mission not found", notActive: "This mission is not part of the active course.", mission: "Mission", completed: "Completed", due: "Due", noDeadline: "Deadline not set yet", loading: "Loading mission state...", failed: "Failed to load this mission.", resources: "Resources", video: "Video", chooseVideo: "Choose one video", github: "GitHub", githubText: "GitHub is a place to store, version, and share code. For this mission, create a repository, push your project code there, and submit the repository link.", artifact: "Artifact" },
+  ru: { back: "Назад к курсу", missing: "Миссия не найдена", notActive: "Эта миссия не входит в активный курс.", mission: "Миссия", completed: "Выполнено", due: "Срок", noDeadline: "Срок пока не установлен", loading: "Загрузка миссии...", failed: "Не удалось загрузить миссию.", resources: "Материалы", video: "Видео", chooseVideo: "Выберите одно видео", github: "GitHub", githubText: "GitHub — это сервис для хранения, управления версиями и публикации кода. Создайте репозиторий, загрузите туда код проекта и отправьте ссылку.", artifact: "Результат" },
+} as const;
+
+function MissingMission({ language }: { language: CourseId }) {
+  const copy = COPY[language];
   return (
     <div className="dark min-h-screen bg-[#050505] text-white">
       <Topbar />
@@ -53,12 +71,12 @@ function MissingMission() {
           className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 transition hover:text-white"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
-          Back to dashboard
+          {copy.back}
         </Link>
         <div className="mt-8 rounded-[8px] border border-white/10 bg-white/[0.04] p-6">
-          <h1 className="text-2xl font-semibold text-white">Mission not found</h1>
+          <h1 className="text-2xl font-semibold text-white">{copy.missing}</h1>
           <p className="mt-2 text-sm leading-6 text-zinc-400">
-            This mission is not part of the active course.
+            {copy.notActive}
           </p>
         </div>
       </main>
@@ -68,7 +86,6 @@ function MissingMission() {
 
 function ModuleInner({ slug }: { slug: string }) {
   const mission = getCourseMission(slug);
-  const missionIndex = COURSE_MISSIONS.findIndex((item) => item.slug === slug) + 1;
   const { data, isLoading, error } = useQuery<ModuleDetail>({
     queryKey: ["module", slug],
     queryFn: () => api<ModuleDetail>(`/modules/${slug}`),
@@ -76,21 +93,26 @@ function ModuleInner({ slug }: { slug: string }) {
   });
 
   if (!mission) {
-    return <MissingMission />;
+    return <MissingMission language={slug.startsWith("ru-") ? "ru" : "en"} />;
   }
 
+  const course = getMissionCourse(mission);
+  const language = course.id;
+  const copy = COPY[language];
+  const missionIndex = course.missions.findIndex((item) => item.slug === slug) + 1;
   const section = getMissionSection(mission);
+  const isCodingAgentMission = mission.slug.endsWith("build-real-vibe-coding");
 
   return (
     <div className="dark min-h-screen bg-[#050505] text-white">
       <Topbar />
       <main className="mx-auto w-full max-w-6xl px-5 py-8 md:px-8 md:py-10">
         <Link
-          href="/dashboard"
+          href={`/courses/${course.id}`}
           className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 transition hover:text-white"
         >
           <ArrowLeft className="size-4" aria-hidden="true" />
-          Back to dashboard
+          {copy.back}
         </Link>
 
         <section className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_24rem]">
@@ -101,11 +123,11 @@ function ModuleInner({ slug }: { slug: string }) {
                   {section.title}
                 </Badge>
                 <p className="text-xs uppercase tracking-widest text-zinc-500">
-                  Mission {missionIndex}
+                  {copy.mission} {missionIndex}
                 </p>
                 {data?.is_completed && (
                   <Badge variant="success" className="rounded-[8px]">
-                    Completed
+                    {copy.completed}
                   </Badge>
                 )}
                 {data?.due_at ? (
@@ -113,14 +135,14 @@ function ModuleInner({ slug }: { slug: string }) {
                     variant="outline"
                     className="rounded-[8px] border-white/15 text-zinc-300"
                   >
-                    Due {new Date(data.due_at).toLocaleString()}
+                    {copy.due} {new Date(data.due_at).toLocaleString(language === "ru" ? "ru-RU" : "en-US")}
                   </Badge>
                 ) : data?.deadline_state === "not_set" ? (
                   <Badge
                     variant="outline"
                     className="rounded-[8px] border-white/15 text-zinc-300"
                   >
-                    Deadline not set yet
+                    {copy.noDeadline}
                   </Badge>
                 ) : null}
               </div>
@@ -140,11 +162,11 @@ function ModuleInner({ slug }: { slug: string }) {
               </div>
 
               {isLoading && (
-                <p className="mt-4 text-sm text-zinc-500">Loading mission state...</p>
+                <p className="mt-4 text-sm text-zinc-500">{copy.loading}</p>
               )}
               {error && (
                 <p className="mt-4 text-sm text-red-300">
-                  Failed to load this mission.
+                  {copy.failed}
                 </p>
               )}
             </div>
@@ -153,7 +175,7 @@ function ModuleInner({ slug }: { slug: string }) {
               <section className="mt-6 rounded-[8px] border border-white/10 bg-white/[0.04] p-6">
                 <div className="mb-4 flex items-center gap-3">
                   <LinkIcon className="size-5 text-emerald-300" aria-hidden="true" />
-                  <h2 className="text-lg font-semibold text-white">Resources</h2>
+                  <h2 className="text-lg font-semibold text-white">{copy.resources}</h2>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   {mission.resources.map((resource) => (
@@ -176,9 +198,9 @@ function ModuleInner({ slug }: { slug: string }) {
               <div className="mb-5 flex items-center gap-3">
                 <PlayCircle className="size-5 text-emerald-300" aria-hidden="true" />
                 <h2 className="text-lg font-semibold text-white">
-                  {mission.slug === "build-real-vibe-coding"
-                    ? "Choose one video"
-                    : "Video"}
+                  {isCodingAgentMission
+                    ? copy.chooseVideo
+                    : copy.video}
                 </h2>
               </div>
               <div className="space-y-6">
@@ -192,16 +214,14 @@ function ModuleInner({ slug }: { slug: string }) {
               </div>
             </section>
 
-            {mission.slug === "build-real-vibe-coding" && (
+            {isCodingAgentMission && (
               <section className="mt-6 rounded-[8px] border border-white/10 bg-white/[0.04] p-6">
                 <div className="mb-3 flex items-center gap-3">
                   <Github className="size-5 text-zinc-200" aria-hidden="true" />
-                  <h2 className="text-lg font-semibold text-white">GitHub</h2>
+                  <h2 className="text-lg font-semibold text-white">{copy.github}</h2>
                 </div>
                 <p className="text-sm leading-6 text-zinc-400">
-                  GitHub is a place to store, version, and share code. For this
-                  mission, create a repository, push your project code there,
-                  and submit the repository link.
+                  {copy.githubText}
                 </p>
               </section>
             )}
@@ -210,6 +230,7 @@ function ModuleInner({ slug }: { slug: string }) {
               <SubmissionForm
                 slug={mission.slug}
                 fields={mission.submissionFields}
+                language={language}
               />
             </section>
           </div>
@@ -219,7 +240,7 @@ function ModuleInner({ slug }: { slug: string }) {
               <div className="flex items-center gap-3">
                 <CheckCircle2 className="size-5 text-emerald-300" aria-hidden="true" />
                 <div>
-                  <p className="text-sm font-semibold text-white">Artifact</p>
+                  <p className="text-sm font-semibold text-white">{copy.artifact}</p>
                   <p className="mt-1 text-sm text-zinc-400">{mission.artifact}</p>
                 </div>
               </div>
@@ -227,7 +248,10 @@ function ModuleInner({ slug }: { slug: string }) {
             {data?.has_chatbot && (
               <ChatPanel
                 slug={mission.slug}
-                openingQuestion={MENTOR_QUESTIONS[mission.slug]}
+                language={language}
+                openingQuestion={language === "ru"
+                  ? RUSSIAN_MENTOR_QUESTIONS[mission.slug.replace(/^ru-/, "")]
+                  : MENTOR_QUESTIONS[mission.slug]}
               />
             )}
           </aside>

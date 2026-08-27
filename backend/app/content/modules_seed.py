@@ -34,7 +34,7 @@ class ModuleSpec(TypedDict):
     submission_fields: list[FieldSpec]
 
 
-MODULES: list[ModuleSpec] = [
+ENGLISH_MODULES: list[ModuleSpec] = [
     {
         "slug": "build-simple",
         "title": "Mission 1 - Start with Simple",
@@ -190,4 +190,90 @@ MODULES: list[ModuleSpec] = [
     },
 ]
 
+_RUSSIAN_COPY: dict[str, tuple[str, str, str, str]] = {
+    "build-simple": (
+        "Миссия 1 — Начните с простого",
+        "Создайте что-нибудь простое в Lovable и отправьте ссылку на проект.",
+        "Ссылка на Lovable",
+        "https://...",
+    ),
+    "build-vibe-coding": (
+        "Миссия 2 — Освойте вайб-кодинг",
+        "Узнайте, что такое вайб-кодинг, затем создайте или улучшите сайт без кода.",
+        "Ссылка на сайт",
+        "https://...",
+    ),
+    "build-real-vibe-coding": (
+        "Миссия 3 — Попробуйте настоящий вайб-кодинг",
+        "Выберите один инструмент для программирования с ИИ и отправьте репозиторий GitHub с кодом.",
+        "Ссылка на GitHub с кодом",
+        "https://github.com/...",
+    ),
+    "discover-find-problem": (
+        "Миссия 4 — Найдите проблему",
+        "Найдите реальные проблемы вокруг себя и предложите возможное решение для каждой.",
+        "Проблемы и решения",
+        "Опишите 5 реальных проблем и 5 способов их решения.",
+    ),
+    "discover-talk-to-people": (
+        "Миссия 5 — Поговорите с людьми",
+        "Выйдите из офиса и узнайте новое из реальных разговоров.",
+        "Выводы из разговоров",
+        "Запишите 5 выводов: с кем вы говорили и что узнали.",
+    ),
+    "discover-evaluate-ideas": (
+        "Миссия 6 — Найдите и оцените идеи стартапа",
+        "Превратите найденные проблемы и разговоры в амбициозные идеи стартапов.",
+        "Идеи стартапов",
+        "Запишите 5 самых амбициозных идей стартапов.",
+    ),
+    "launch-build-mvp": (
+        "Миссия 7 — Создайте MVP",
+        "Создайте минимально жизнеспособный продукт для проверки гипотез.",
+        "Ссылка на MVP",
+        "https://...",
+    ),
+    "launch-product-online": (
+        "Миссия 8 — Запустите продукт онлайн",
+        "Расскажите о продукте, опубликовав материалы о нём в интернете.",
+        "Ссылки на аккаунты в соцсетях",
+        "https://...",
+    ),
+    "launch-first-customers": (
+        "Миссия 9 — Найдите первых клиентов",
+        "Опишите, кому вы продаёте и как собираетесь найти первых клиентов.",
+        "План поиска клиентов и продаж",
+        "Опишите своих клиентов, каналы поиска и первые шаги продаж.",
+    ),
+}
+
+
+def _russian_module(module: ModuleSpec) -> ModuleSpec:
+    title, description, label, placeholder = _RUSSIAN_COPY[module["slug"]]
+    fields = [dict(field) for field in module["submission_fields"]]
+    fields[0]["label"] = label
+    fields[0]["placeholder"] = placeholder
+    return {
+        **module,
+        "slug": f"ru-{module['slug']}",
+        "title": title,
+        "description": description,
+        "submission_fields": fields,
+    }
+
+
+RUSSIAN_MODULES: list[ModuleSpec] = [_russian_module(module) for module in ENGLISH_MODULES]
+MODULES: list[ModuleSpec] = [*ENGLISH_MODULES, *RUSSIAN_MODULES]
+COURSE_MODULE_SLUGS: dict[str, tuple[str, ...]] = {
+    "en": tuple(module["slug"] for module in ENGLISH_MODULES),
+    "ru": tuple(module["slug"] for module in RUSSIAN_MODULES),
+}
 ACTIVE_MODULE_SLUGS: tuple[str, ...] = tuple(module["slug"] for module in MODULES)
+
+
+def base_module_slug(slug: str) -> str:
+    return slug.removeprefix("ru-")
+
+
+def course_id_for_slug(slug: str) -> str:
+    return "ru" if slug.startswith("ru-") else "en"

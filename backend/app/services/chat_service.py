@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
+from app.content.modules_seed import base_module_slug, course_id_for_slug
 from app.content.prompts import SUMMARY_SCHEMAS, SYSTEM_PROMPTS
 from app.models import ChatMessage, ChatSession, ChatSummary, Module
 from app.services.openai_client import client
@@ -40,9 +41,11 @@ async def load_history(db: AsyncSession, session_id: int) -> list[ChatMessage]:
 
 
 def _system_prompt_for(slug: str) -> str:
-    prompt = SYSTEM_PROMPTS.get(slug)
+    prompt = SYSTEM_PROMPTS.get(base_module_slug(slug))
     if prompt is None:
         raise ValueError(f"No system prompt for module {slug!r}")
+    if course_id_for_slug(slug) == "ru":
+        return f"{prompt}\n\nAlways respond in Russian."
     return prompt
 
 
@@ -91,7 +94,7 @@ async def stream_chat(
 async def generate_summary(
     db: AsyncSession, session: ChatSession, module_slug: str
 ) -> ChatSummary:
-    schema = SUMMARY_SCHEMAS.get(module_slug)
+    schema = SUMMARY_SCHEMAS.get(base_module_slug(module_slug))
     if schema is None:
         raise ValueError(f"Module {module_slug!r} does not support summaries")
 

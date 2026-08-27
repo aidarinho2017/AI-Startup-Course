@@ -3,7 +3,7 @@ import json
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 from sqlalchemy import select
 
-from app.content.modules_seed import ACTIVE_MODULE_SLUGS, MODULES
+from app.content.modules_seed import ACTIVE_MODULE_SLUGS, MODULES, course_id_for_slug
 from app.deps import CurrentUser, DbSession
 from app.models import Module, Submission
 from app.schemas.submissions import SubmissionIn, SubmissionOut
@@ -18,6 +18,7 @@ def _validate_submission(slug: str, content: dict) -> dict:
     spec = _SPEC_BY_SLUG.get(slug)
     if spec is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Module not found")
+    russian = course_id_for_slug(slug) == "ru"
     cleaned: dict = {}
     for field in spec["submission_fields"]:
         key = field["key"]
@@ -25,7 +26,7 @@ def _validate_submission(slug: str, content: dict) -> dict:
         if not isinstance(value, str):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Field '{key}' must be a string",
+                detail=(f"Поле '{key}' должно быть строкой" if russian else f"Field '{key}' must be a string"),
             )
         value = value.strip()
         if field["type"] == "link_list":
@@ -34,18 +35,18 @@ def _validate_submission(slug: str, content: dict) -> dict:
             except json.JSONDecodeError as exc:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=f"Field '{field['label']}' must be a valid list of links",
+                    detail=(f"Поле «{field['label']}» должно содержать список ссылок" if russian else f"Field '{field['label']}' must be a valid list of links"),
                 ) from exc
             if not isinstance(links, list) or not all(isinstance(link, str) for link in links):
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=f"Field '{field['label']}' must be a valid list of links",
+                    detail=(f"Поле «{field['label']}» должно содержать список ссылок" if russian else f"Field '{field['label']}' must be a valid list of links"),
                 )
             cleaned_links = [link.strip() for link in links if link.strip()]
             if field.get("required") and not cleaned_links:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=f"Field '{field['label']}' is required",
+                    detail=(f"Поле «{field['label']}» обязательно" if russian else f"Field '{field['label']}' is required"),
                 )
             invalid_link = next(
                 (
@@ -58,21 +59,21 @@ def _validate_submission(slug: str, content: dict) -> dict:
             if invalid_link is not None:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=f"Field '{field['label']}' must contain valid URLs",
+                    detail=(f"Поле «{field['label']}» должно содержать корректные ссылки" if russian else f"Field '{field['label']}' must contain valid URLs"),
                 )
             cleaned[key] = json.dumps(cleaned_links)
             continue
         if field.get("required") and not value:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Field '{field['label']}' is required",
+                detail=(f"Поле «{field['label']}» обязательно" if russian else f"Field '{field['label']}' is required"),
             )
         if field["type"] == "url" and value and not (
             value.startswith("http://") or value.startswith("https://")
         ):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Field '{field['label']}' must be a valid URL",
+                detail=(f"Поле «{field['label']}» должно содержать корректную ссылку" if russian else f"Field '{field['label']}' must be a valid URL"),
             )
         cleaned[key] = value
     return cleaned

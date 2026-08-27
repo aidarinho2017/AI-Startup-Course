@@ -44,6 +44,14 @@ class InstructorModuleOut(BaseModel):
     submission_count: int
 
 
+class InstructorCourseProgressOut(BaseModel):
+    course_id: str
+    completed_count: int
+    reviewed_count: int
+    unreviewed_count: int
+    total_modules: int
+
+
 class InstructorStudentOut(BaseModel):
     id: uuid.UUID
     name: str
@@ -57,6 +65,7 @@ class InstructorStudentOut(BaseModel):
     unreviewed_count: int
     submission_count: int
     total_modules: int
+    course_progress: list[InstructorCourseProgressOut]
 
 
 class InstructorStudentSubmissionsOut(BaseModel):

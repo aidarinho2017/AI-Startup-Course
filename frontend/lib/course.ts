@@ -1,5 +1,6 @@
 import { SubmissionFieldSpec } from "@/lib/types";
 
+export type CourseId = "en" | "ru";
 export type CourseSectionId = "build" | "discover" | "launch" | "scale";
 
 export type CourseVideo = {
@@ -31,6 +32,14 @@ export type CourseSection = {
   description: string;
   status: "active" | "coming-soon";
   missionSlugs: string[];
+};
+
+export type Course = {
+  id: CourseId;
+  name: string;
+  description: string;
+  missions: CourseMission[];
+  sections: CourseSection[];
 };
 
 export const BUILD_MISSIONS: CourseMission[] = [
@@ -321,8 +330,144 @@ export const COURSE_SECTIONS: CourseSection[] = [
   },
 ];
 
+type MissionTranslation = Pick<
+  CourseMission,
+  "title" | "shortTitle" | "description" | "brief" | "artifact" | "videos" | "submissionFields"
+>;
+
+const RUSSIAN_MISSION_COPY: Record<string, MissionTranslation> = {
+  "build-simple": {
+    title: "Миссия 1 — Начните с простого",
+    shortTitle: "Начните с простого",
+    description: "Откройте Lovable по ссылке с дополнительными кредитами и создайте что-нибудь простое.",
+    brief: "Не усложняйте идею. Цель — создать работающий результат и привыкнуть быстро запускать проекты.",
+    artifact: "Ссылка на Lovable",
+    videos: [{ title: "Lovable AI: сайт и хостинг за 5 минут", youtubeId: "nkPYaKZzW6o" }],
+    submissionFields: [{ key: "lovable_url", label: "Ссылка на Lovable", type: "url", required: true, placeholder: "https://..." }],
+  },
+  "build-vibe-coding": {
+    title: "Миссия 2 — Освойте вайб-кодинг",
+    shortTitle: "Освойте вайб-кодинг",
+    description: "Узнайте, что такое вайб-кодинг, затем создайте новый сайт или улучшите результат первой миссии.",
+    brief: "Используйте любой no-code или AI-инструмент, например Replit, Lovable или Bolt.",
+    artifact: "Ссылка на сайт",
+    videos: [{ title: "Что такое вайб-кодинг", youtubeId: "w3K1EguBrTc" }],
+    submissionFields: [{ key: "website_url", label: "Ссылка на сайт", type: "url", required: true, placeholder: "https://..." }],
+  },
+  "build-real-vibe-coding": {
+    title: "Миссия 3 — Попробуйте настоящий вайб-кодинг",
+    shortTitle: "Настоящий вайб-кодинг",
+    description: "Выберите один урок по работе с AI-агентом, попробуйте этот процесс и отправьте репозиторий GitHub с кодом.",
+    brief: "Не нужно изучать все инструменты. Выберите Claude Code, Cursor или Codex и создайте код, которым можно поделиться.",
+    artifact: "Ссылка на GitHub с кодом",
+    videos: [
+      { title: "Claude Code для начинающих", youtubeId: "jmJaHWVSwOo" },
+      { title: "Обзор Cursor AI", youtubeId: "23in9xpt-FE" },
+      { title: "Обзор OpenAI Codex", youtubeId: "hqBSEvgSf40" },
+    ],
+    submissionFields: [{ key: "github_url", label: "Ссылка на GitHub с кодом", type: "url", required: true, placeholder: "https://github.com/..." }],
+  },
+  "discover-find-problem": {
+    title: "Миссия 4 — Найдите проблему",
+    shortTitle: "Найдите проблему",
+    description: "Найдите реальные проблемы вокруг себя и предложите возможное решение для каждой.",
+    brief: "Главная задача бизнеса — решать проблемы и зарабатывать деньги.",
+    artifact: "5 реальных проблем и 5 решений",
+    videos: [{ title: "Как найти идею для IT-стартапа", youtubeId: "b96WmfzlBoc" }],
+    submissionFields: [{ key: "problems_and_solutions", label: "Проблемы и решения", type: "textarea", required: true, placeholder: "Опишите 5 реальных проблем и 5 способов их решения." }],
+  },
+  "discover-talk-to-people": {
+    title: "Миссия 5 — Поговорите с людьми",
+    shortTitle: "Поговорите с людьми",
+    description: "Выйдите из офиса и узнайте новое из реальных разговоров.",
+    brief: "Говорите с людьми напрямую. Узнайте, что они действительно делают, что причиняет им боль и что вас удивило.",
+    artifact: "5 выводов из разговоров с клиентами",
+    videos: [{ title: "Что такое проблемное интервью и зачем оно нужно", youtubeId: "BmNX3eCy5JY" }],
+    submissionFields: [{ key: "conversation_insights", label: "Выводы из разговоров", type: "textarea", required: true, placeholder: "Запишите 5 выводов: с кем вы говорили и что узнали." }],
+  },
+  "discover-evaluate-ideas": {
+    title: "Миссия 6 — Найдите и оцените идеи стартапа",
+    shortTitle: "Найдите и оцените идеи",
+    description: "Превратите найденные проблемы и разговоры в амбициозные идеи стартапов.",
+    brief: "Ищите амбициозные и конкретные идеи, связанные с реальными проблемами.",
+    artifact: "5 амбициозных идей стартапов",
+    videos: [{ title: "Как протестировать бизнес-идею: 5 шагов к MVP", youtubeId: "_-SQM9EwHLM" }],
+    submissionFields: [{ key: "startup_ideas", label: "Идеи стартапов", type: "textarea", required: true, placeholder: "Запишите 5 самых амбициозных идей стартапов." }],
+  },
+  "launch-build-mvp": {
+    title: "Миссия 7 — Создайте MVP",
+    shortTitle: "Создайте MVP",
+    description: "Создайте минимально жизнеспособный продукт для проверки продуктовых гипотез.",
+    brief: "MVP — это минимально жизнеспособный продукт. Проверьте гипотезы с помощью самой маленькой полезной версии.",
+    artifact: "Ссылка на MVP",
+    videos: [{ title: "MVP для стартапа", youtubeId: "dJDPjR44AbM" }],
+    submissionFields: [{ key: "mvp_url", label: "Ссылка на MVP", type: "url", required: true, placeholder: "https://..." }],
+  },
+  "launch-product-online": {
+    title: "Миссия 8 — Запустите продукт онлайн",
+    shortTitle: "Запустите продукт онлайн",
+    description: "Расскажите всем о своём продукте, публикуя материалы о нём в интернете.",
+    brief: "Опубликуйте 10 постов о продукте в Instagram, Threads или LinkedIn. Отправьте ссылки на аккаунты с этими публикациями.",
+    artifact: "Ссылки на аккаунты в соцсетях",
+    videos: [{ title: "Схема продвижения во всех соцсетях", youtubeId: "B7QMtvVj7zE" }],
+    submissionFields: [{ key: "social_account_links", label: "Ссылки на аккаунты в соцсетях", type: "link_list", required: true, placeholder: "https://..." }],
+  },
+  "launch-first-customers": {
+    title: "Миссия 9 — Найдите первых клиентов",
+    shortTitle: "Найдите первых клиентов",
+    description: "Опишите, кому вы продаёте и как собираетесь найти первых клиентов.",
+    brief: "Конкретно опишите клиентов, где они проводят время и какие первые шаги продаж вы сделаете.",
+    artifact: "План поиска клиентов и продаж",
+    videos: [{ title: "Как и где стартапу найти первых клиентов", youtubeId: "lWwkb8d_4q0" }],
+    submissionFields: [{ key: "customer_plan", label: "План поиска клиентов и продаж", type: "textarea", required: true, placeholder: "Опишите своих клиентов, каналы поиска и первые шаги продаж." }],
+  },
+};
+
+export const RUSSIAN_COURSE_MISSIONS: CourseMission[] = COURSE_MISSIONS.map((mission) => ({
+  ...mission,
+  ...RUSSIAN_MISSION_COPY[mission.slug],
+  slug: `ru-${mission.slug}`,
+  resources: mission.resources.map((resource) => ({ ...resource, label: "Приглашение Lovable" })),
+}));
+
+const RUSSIAN_SECTION_COPY: Record<CourseSectionId, Pick<CourseSection, "title" | "description">> = {
+  build: { title: "Создание", description: "Создайте первые продукты с помощью ИИ и опубликуйте рабочие ссылки." },
+  discover: { title: "Исследование", description: "Изучите клиентов, уточните проблемы и найдите сильные идеи стартапов." },
+  launch: { title: "Запуск", description: "Покажите продукт реальным пользователям и получите первые отзывы." },
+  scale: { title: "Рост", description: "Улучшайте удержание, каналы роста и монетизацию после запуска." },
+};
+
+export const RUSSIAN_COURSE_SECTIONS: CourseSection[] = COURSE_SECTIONS.map((section) => ({
+  ...section,
+  ...RUSSIAN_SECTION_COPY[section.id],
+  missionSlugs: section.missionSlugs.map((slug) => `ru-${slug}`),
+}));
+
+export const COURSES: Course[] = [
+  {
+    id: "en",
+    name: "English Course",
+    description: "Build, validate, and launch an AI product through nine practical missions.",
+    missions: COURSE_MISSIONS,
+    sections: COURSE_SECTIONS,
+  },
+  {
+    id: "ru",
+    name: "Курс на русском",
+    description: "Создайте, проверьте и запустите AI-продукт за девять практических миссий.",
+    missions: RUSSIAN_COURSE_MISSIONS,
+    sections: RUSSIAN_COURSE_SECTIONS,
+  },
+];
+
+export const ALL_COURSE_MISSIONS = COURSES.flatMap((course) => course.missions);
+
+export function getCourse(courseId: string): Course | undefined {
+  return COURSES.find((course) => course.id === courseId);
+}
+
 export function getCourseMission(slug: string): CourseMission | undefined {
-  return COURSE_MISSIONS.find((mission) => mission.slug === slug);
+  return ALL_COURSE_MISSIONS.find((mission) => mission.slug === slug);
 }
 
 export function getSectionMissions(section: CourseSection): CourseMission[] {
@@ -332,5 +477,9 @@ export function getSectionMissions(section: CourseSection): CourseMission[] {
 }
 
 export function getMissionSection(mission: CourseMission): CourseSection {
-  return COURSE_SECTIONS.find((section) => section.id === mission.sectionId)!;
+  return getMissionCourse(mission).sections.find((section) => section.id === mission.sectionId)!;
+}
+
+export function getMissionCourse(mission: CourseMission): Course {
+  return COURSES.find((course) => course.missions.some((item) => item.slug === mission.slug))!;
 }

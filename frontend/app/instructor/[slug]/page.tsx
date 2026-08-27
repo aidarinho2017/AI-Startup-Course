@@ -104,6 +104,9 @@ function ModuleSubmissionsInner({ slug }: { slug: string }) {
         <h1 className="mt-4 text-2xl font-semibold tracking-tight capitalize">
           {mission?.title ?? slug.replace(/-/g, " ")} — Submissions
         </h1>
+        <Badge variant="outline" className="mt-3">
+          {slug.startsWith("ru-") ? "Russian Course" : "English Course"}
+        </Badge>
 
         {isLoading && <p className="mt-10 text-sm text-muted-foreground">Loading…</p>}
         {error && <p className="mt-10 text-sm text-destructive">Failed to load submissions.</p>}

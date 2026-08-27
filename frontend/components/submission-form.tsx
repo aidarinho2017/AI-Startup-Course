@@ -5,6 +5,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Plus, Trash2 } from "lucide-react";
 import { api, ApiError } from "@/lib/api";
 import { Submission, SubmissionFieldSpec } from "@/lib/types";
+import type { CourseId } from "@/lib/course";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,13 +30,21 @@ function serializeLinkListValue(links: string[]): string {
   return JSON.stringify(links);
 }
 
+const COPY = {
+  en: { loadFailed: "Failed to load", saveFailed: "Failed to save", title: "Homework", description: "Submit your artifact to complete this mission.", submitted: "Submitted", loading: "Loading…", remove: "Remove", add: "Add account", saving: "Saving…", update: "Update submission", submit: "Submit", saved: "Last saved" },
+  ru: { loadFailed: "Не удалось загрузить", saveFailed: "Не удалось сохранить", title: "Задание", description: "Отправьте результат, чтобы завершить миссию.", submitted: "Отправлено", loading: "Загрузка…", remove: "Удалить", add: "Добавить аккаунт", saving: "Сохранение…", update: "Обновить ответ", submit: "Отправить", saved: "Сохранено" },
+} as const;
+
 export function SubmissionForm({
   slug,
   fields,
+  language = "en",
 }: {
   slug: string;
   fields: SubmissionFieldSpec[];
+  language?: CourseId;
 }) {
+  const copy = COPY[language];
   const qc = useQueryClient();
   const [values, setValues] = useState<Record<string, string>>(() =>
     Object.fromEntries(fields.map((f) => [f.key, ""]))
@@ -63,7 +72,7 @@ export function SubmissionForm({
       } catch (err) {
         if (cancelled) return;
         if (!(err instanceof ApiError && err.status === 404)) {
-          setError(err instanceof ApiError ? err.message : "Failed to load");
+          setError(err instanceof ApiError ? err.message : copy.loadFailed);
         }
       } finally {
         if (!cancelled) setLoading(false);
@@ -72,7 +81,7 @@ export function SubmissionForm({
     return () => {
       cancelled = true;
     };
-  }, [slug, fields]);
+  }, [slug, fields, copy.loadFailed]);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,7 +96,7 @@ export function SubmissionForm({
       qc.invalidateQueries({ queryKey: ["dashboard"] });
       qc.invalidateQueries({ queryKey: ["module", slug] });
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to save");
+      setError(err instanceof ApiError ? err.message : copy.saveFailed);
     } finally {
       setSaving(false);
     }
@@ -105,17 +114,17 @@ export function SubmissionForm({
       <CardHeader>
         <div className="flex items-start justify-between gap-2">
           <div>
-            <CardTitle>Homework</CardTitle>
+            <CardTitle>{copy.title}</CardTitle>
             <CardDescription>
-              Submit your artifact to complete this mission.
+              {copy.description}
             </CardDescription>
           </div>
-          {savedAt && <Badge variant="success">Submitted</Badge>}
+          {savedAt && <Badge variant="success">{copy.submitted}</Badge>}
         </div>
       </CardHeader>
       <CardContent>
         {loading ? (
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <p className="text-sm text-muted-foreground">{copy.loading}</p>
         ) : (
           <form className="space-y-4" onSubmit={onSubmit}>
             {fields.map((f) => (
@@ -156,7 +165,7 @@ export function SubmissionForm({
                                 variant="outline"
                                 size="sm"
                                 className="h-10 w-10 shrink-0 px-0"
-                                aria-label={`Remove ${f.label.toLowerCase()} ${index + 1}`}
+                                aria-label={`${copy.remove} ${f.label.toLowerCase()} ${index + 1}`}
                                 onClick={() => {
                                   const next = rows.filter((_, rowIndex) => rowIndex !== index);
                                   updateLinkList(f.key, next.length > 0 ? next : [""]);
@@ -174,7 +183,7 @@ export function SubmissionForm({
                             onClick={() => updateLinkList(f.key, [...rows, ""])}
                           >
                             <Plus className="size-4" aria-hidden="true" />
-                            Add account
+                            {copy.add}
                           </Button>
                         </>
                       );
@@ -209,11 +218,11 @@ export function SubmissionForm({
 
             <div className="flex items-center gap-3">
               <Button type="submit" disabled={saving}>
-                {saving ? "Saving…" : savedAt ? "Update submission" : "Submit"}
+                {saving ? copy.saving : savedAt ? copy.update : copy.submit}
               </Button>
               {savedAt && (
                 <p className="text-xs text-muted-foreground">
-                  Last saved {new Date(savedAt).toLocaleString()}
+                  {copy.saved} {new Date(savedAt).toLocaleString(language === "ru" ? "ru-RU" : "en-US")}
                 </p>
               )}
             </div>

@@ -115,6 +115,13 @@ export type InstructorStudentSummary = InstructorStudent & {
   unreviewed_count: number;
   submission_count: number;
   total_modules: number;
+  course_progress: {
+    course_id: "en" | "ru";
+    completed_count: number;
+    reviewed_count: number;
+    unreviewed_count: number;
+    total_modules: number;
+  }[];
 };
 
 export type InstructorSubmissionModule = {

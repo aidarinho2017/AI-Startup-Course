@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import type { CourseId } from "@/lib/course";
 
 function humanize(key: string) {
   return key
@@ -52,22 +53,24 @@ function renderValue(value: unknown): React.ReactNode {
 export function SummaryPanel({
   summary,
   generatedAt,
+  language = "en",
 }: {
   summary: Record<string, unknown>;
   generatedAt: string;
+  language?: CourseId;
 }) {
   const entries = Object.entries(summary);
   return (
     <Card>
       <CardHeader>
-        <CardTitle>AI summary</CardTitle>
+        <CardTitle>{language === "ru" ? "Сводка ИИ" : "AI summary"}</CardTitle>
         <CardDescription>
-          Generated {new Date(generatedAt).toLocaleString()}
+          {language === "ru" ? "Создано" : "Generated"} {new Date(generatedAt).toLocaleString(language === "ru" ? "ru-RU" : "en-US")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {entries.length === 0 && (
-          <p className="text-sm text-muted-foreground">Empty summary.</p>
+          <p className="text-sm text-muted-foreground">{language === "ru" ? "Сводка пуста." : "Empty summary."}</p>
         )}
         {entries.map(([k, v]) => (
           <div key={k} className="space-y-1">

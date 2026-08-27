@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 
-from app.content.modules_seed import ACTIVE_MODULE_SLUGS
+from app.content.modules_seed import ACTIVE_MODULE_SLUGS, base_module_slug
 from app.content.prompts import SUMMARY_SCHEMAS
 from app.deps import CurrentUser, DbSession
 from app.models import ChatSummary, Module
@@ -65,7 +65,7 @@ async def post_chat(slug: str, body: ChatRequest, user: CurrentUser, db: DbSessi
 
 @router.post("/{slug}/chat/summary", response_model=SummaryOut)
 async def post_chat_summary(slug: str, user: CurrentUser, db: DbSession) -> SummaryOut:
-    if slug not in SUMMARY_SCHEMAS:
+    if base_module_slug(slug) not in SUMMARY_SCHEMAS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This module does not support summaries",
@@ -88,7 +88,7 @@ async def post_chat_summary(slug: str, user: CurrentUser, db: DbSession) -> Summ
 
 @router.get("/{slug}/chat/summary", response_model=SummaryOut)
 async def get_chat_summary(slug: str, user: CurrentUser, db: DbSession) -> SummaryOut:
-    if slug not in SUMMARY_SCHEMAS:
+    if base_module_slug(slug) not in SUMMARY_SCHEMAS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This module does not support summaries",

@@ -4,12 +4,19 @@ import { useEffect, useRef, useState } from "react";
 import { api, ApiError } from "@/lib/api";
 import { streamChat } from "@/lib/sse";
 import { ChatHistory, ChatMessage, Summary } from "@/lib/types";
+import type { CourseId } from "@/lib/course";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { SummaryPanel } from "@/components/summary-panel";
 
-export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQuestion?: string }) {
+const COPY = {
+  en: { loadFailed: "Failed to load chat", summaryFailed: "Failed to generate summary", title: "AI mentor", description: "Specialized for this mission. History is saved.", defaultQuestion: "How can I help you with this mission?", you: "You", mentor: "Mentor", placeholder: "Type a message… (Cmd/Ctrl+Enter to send)", sending: "Sending…", send: "Send", generating: "Generating summary…", regenerate: "Regenerate summary", generate: "Generate summary", summaryHelp: "Get a structured readout based on the conversation." },
+  ru: { loadFailed: "Не удалось загрузить чат", summaryFailed: "Не удалось создать сводку", title: "AI-наставник", description: "Помогает с этой миссией. История сохраняется.", defaultQuestion: "Чем помочь с этой миссией?", you: "Вы", mentor: "Наставник", placeholder: "Введите сообщение… (Cmd/Ctrl+Enter для отправки)", sending: "Отправка…", send: "Отправить", generating: "Создание сводки…", regenerate: "Обновить сводку", generate: "Создать сводку", summaryHelp: "Получите структурированную сводку разговора." },
+} as const;
+
+export function ChatPanel({ slug, openingQuestion, language = "en" }: { slug: string; openingQuestion?: string; language?: CourseId }) {
+  const copy = COPY[language];
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
@@ -29,13 +36,13 @@ export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQues
         setMessages(history.messages.filter((m) => m.role !== "system"));
       } catch (err) {
         if (cancelled) return;
-        setError(err instanceof ApiError ? err.message : "Failed to load chat");
+        setError(err instanceof ApiError ? err.message : copy.loadFailed);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [slug, copy.loadFailed]);
 
   useEffect(() => {
     let cancelled = false;
@@ -128,7 +135,7 @@ export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQues
       });
       setSummary(s);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Failed to generate summary");
+      setError(err instanceof ApiError ? err.message : copy.summaryFailed);
     } finally {
       setGeneratingSummary(false);
     }
@@ -138,9 +145,9 @@ export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQues
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>AI mentor</CardTitle>
+          <CardTitle>{copy.title}</CardTitle>
           <CardDescription>
-            Specialized for this mission. History is saved.
+            {copy.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -150,7 +157,7 @@ export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQues
           >
             {messages.length === 0 && !streaming && (
               <p className="text-sm text-muted-foreground">
-                {openingQuestion ?? "How can I help you with this mission?"}
+                {openingQuestion ?? copy.defaultQuestion}
               </p>
             )}
             <div className="space-y-4">
@@ -164,7 +171,7 @@ export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQues
                   }
                 >
                   <div className="mb-1 text-xs uppercase tracking-wide opacity-60">
-                    {m.role === "user" ? "You" : "Mentor"}
+                    {m.role === "user" ? copy.you : copy.mentor}
                   </div>
                   <div className="whitespace-pre-wrap">
                     {m.content}
@@ -189,12 +196,12 @@ export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQues
                   send();
                 }
               }}
-              placeholder="Type a message… (Cmd/Ctrl+Enter to send)"
+              placeholder={copy.placeholder}
               className="min-h-[80px]"
               disabled={streaming}
             />
             <Button onClick={send} disabled={streaming || !input.trim()}>
-              {streaming ? "Sending…" : "Send"}
+              {streaming ? copy.sending : copy.send}
             </Button>
           </div>
 
@@ -207,13 +214,13 @@ export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQues
                 disabled={generatingSummary || messages.length === 0}
               >
                 {generatingSummary
-                  ? "Generating summary…"
+                  ? copy.generating
                   : summary
-                  ? "Regenerate summary"
-                  : "Generate summary"}
+                  ? copy.regenerate
+                  : copy.generate}
               </Button>
               <p className="text-xs text-muted-foreground">
-                Get a structured readout based on the conversation.
+                {copy.summaryHelp}
               </p>
             </div>
           )}
@@ -224,6 +231,7 @@ export function ChatPanel({ slug, openingQuestion }: { slug: string; openingQues
         <SummaryPanel
           summary={summary.summary}
           generatedAt={summary.generated_at}
+          language={language}
         />
       )}
     </div>
