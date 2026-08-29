@@ -3,6 +3,13 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 
+for port in 3000 8000; do
+  if (echo >"/dev/tcp/127.0.0.1/$port") 2>/dev/null; then
+    echo "Port $port is already in use. Stop the existing website before starting another copy."
+    exit 1
+  fi
+done
+
 echo "==> AI Startup Course — booting backend + frontend"
 echo "    Root: $ROOT"
 

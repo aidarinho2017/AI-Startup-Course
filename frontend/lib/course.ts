@@ -21,6 +21,7 @@ export type CourseMission = {
   description: string;
   brief: string;
   homework: string;
+  rubric: string[];
   artifact: string;
   resources: CourseResource[];
   videos: CourseVideo[];
@@ -52,6 +53,12 @@ export const BUILD_MISSIONS: CourseMission[] = [
     description: "Open Lovable, use the invite link for extra credits, and build anything simple.",
     brief: "Do not overthink the idea. The goal is to create a working artifact and get comfortable shipping quickly.",
     homework: "Create one simple working page or app in Lovable. It can solve a small personal problem or demonstrate one useful feature. Publish it and submit a Lovable link that anyone with the link can open.",
+    rubric: [
+      "The project was created in Lovable.",
+      "The link opens the published page or application.",
+      "The project contains a visible page or useful feature.",
+      "The instructor can open it without requesting permission.",
+    ],
     artifact: "Lovable link",
     resources: [
       {
@@ -83,6 +90,12 @@ export const BUILD_MISSIONS: CourseMission[] = [
     description: "Learn what vibe coding is, then create a new website or improve your first mission.",
     brief: "Use any no-code or AI coding tool such as Replit, Lovable, or Bolt.",
     homework: "Create a new website with Replit, Lovable, or Bolt, or make a meaningful improvement to your first project. Add or improve at least one useful feature, publish the result, and submit the live website link.",
+    rubric: [
+      "The result is a new website or a meaningful improvement to Mission 1.",
+      "It was created with an AI or no-code development tool.",
+      "At least one useful feature, content section, or design element was added or improved.",
+      "The submitted link opens the live website.",
+    ],
     artifact: "Website link",
     resources: [],
     videos: [
@@ -109,6 +122,12 @@ export const BUILD_MISSIONS: CourseMission[] = [
     description: "Choose one coding-agent tutorial, try the workflow, and submit a GitHub repository with code.",
     brief: "You do not need to learn every tool. Pick Claude Code, Cursor, or Codex and use it to create code you can share.",
     homework: "Choose Claude Code, Cursor, or Codex and use it to build a small working project. Push the project files to GitHub and submit the repository link. Make sure the repository contains your code and is accessible to the instructor.",
+    rubric: [
+      "Claude Code, Cursor, or Codex was used to create the project.",
+      "The GitHub repository contains the project source code.",
+      "The repository represents a working result rather than an empty project.",
+      "The instructor can access the repository.",
+    ],
     artifact: "GitHub link with code",
     resources: [],
     videos: [
@@ -146,6 +165,12 @@ export const DISCOVER_MISSIONS: CourseMission[] = [
     description: "Identify real problems around you and connect each problem to a possible solution.",
     brief: "Business's main goal is to solve problems and earn money.",
     homework: "List five real problems that you or people around you experience. For each problem, explain who faces it, when it happens, and one possible solution. Submit five numbered problem-and-solution pairs.",
+    rubric: [
+      "Five distinct real problems are included.",
+      "Each problem identifies who experiences it.",
+      "Each problem explains when or where it occurs.",
+      "Every problem has one corresponding possible solution.",
+    ],
     artifact: "5 existing problems and 5 solutions",
     resources: [],
     videos: [
@@ -172,6 +197,12 @@ export const DISCOVER_MISSIONS: CourseMission[] = [
     description: "Get out of the building and learn from real conversations.",
     brief: "Talk to people directly. Focus on what they actually do, what hurts, and what surprised you.",
     homework: "Talk to potential users about one of the problems you found. Ask about their real past experience instead of pitching your solution. Submit five distinct insights, including who you spoke with and what you learned.",
+    rubric: [
+      "The findings come from conversations with potential users.",
+      "Five distinct insights are included.",
+      "Each insight identifies the relevant interviewee or customer segment.",
+      "Each insight describes something concrete learned from the conversation.",
+    ],
     artifact: "5 customer conversation insights",
     resources: [],
     videos: [
@@ -198,6 +229,12 @@ export const DISCOVER_MISSIONS: CourseMission[] = [
     description: "Turn problems and conversations into ambitious startup ideas.",
     brief: "Aim for ideas that are ambitious, specific, and connected to real problems.",
     homework: "Turn your problems and interview insights into five startup ideas. For each idea, name the target customer, the problem, and the proposed solution. Submit them as a numbered list and make each idea specific enough to test.",
+    rubric: [
+      "Five distinct startup ideas are included.",
+      "Every idea identifies a target customer.",
+      "Every idea addresses a specific real problem.",
+      "Every idea proposes a solution concrete enough to test.",
+    ],
     artifact: "5 ambitious startup ideas",
     resources: [],
     videos: [
@@ -227,6 +264,12 @@ export const LAUNCH_MISSIONS: CourseMission[] = [
     description: "Build a minimum viable product that can test your product hypotheses.",
     brief: "MVP means Minimum Viable Product. Use it to check your hypotheses about your product with the smallest useful version.",
     homework: "Choose one key product hypothesis and build the smallest working version that can test it. Make the core user flow usable, publish the MVP, and submit a link that the instructor can open.",
+    rubric: [
+      "The MVP tests one identifiable product hypothesis.",
+      "The primary user flow works.",
+      "The submitted URL opens the MVP itself.",
+      "The instructor can access it without requesting permission.",
+    ],
     artifact: "MVP link",
     resources: [],
     videos: [
@@ -257,6 +300,12 @@ export const LAUNCH_MISSIONS: CourseMission[] = [
     description: "Let everyone know what you are building by posting about your product online.",
     brief: "Publish 10 posts about your product on Instagram, Threads, or LinkedIn. Submit the social account links where those posts can be found.",
     homework: "Publish 10 posts about your product on Instagram, Threads, LinkedIn, or a combination of them. The posts should explain the problem, product, progress, or lessons learned. Add the links to every account where the public posts can be found.",
+    rubric: [
+      "Ten public posts about the product were published.",
+      "The posts cover the problem, product, progress, or lessons learned.",
+      "Every social account containing the posts is included.",
+      "The instructor can access the posts publicly.",
+    ],
     artifact: "Social account links",
     resources: [],
     videos: [
@@ -283,6 +332,12 @@ export const LAUNCH_MISSIONS: CourseMission[] = [
     description: "Describe who you are selling to and how you plan to reach your first customers.",
     brief: "Be specific about your customers, where they spend time, and the first sales actions you will take.",
     homework: "Define one specific first-customer segment, where you can reach them, and what you will offer. Then describe your first three sales actions, including the channel and message you will use. Submit the complete customer and sales plan below.",
+    rubric: [
+      "One specific first-customer segment is defined.",
+      "The plan explains where those customers can be reached.",
+      "The offer for those customers is described.",
+      "Three sales actions are included, with a channel and message for each.",
+    ],
     artifact: "Customer and sales plan",
     resources: [],
     videos: [
@@ -342,7 +397,7 @@ export const COURSE_SECTIONS: CourseSection[] = [
 
 type MissionTranslation = Pick<
   CourseMission,
-  "title" | "shortTitle" | "description" | "brief" | "homework" | "artifact" | "videos" | "submissionFields"
+  "title" | "shortTitle" | "description" | "brief" | "homework" | "rubric" | "artifact" | "videos" | "submissionFields"
 >;
 
 const RUSSIAN_MISSION_COPY: Record<string, MissionTranslation> = {
@@ -352,6 +407,12 @@ const RUSSIAN_MISSION_COPY: Record<string, MissionTranslation> = {
     description: "Откройте Lovable по ссылке с дополнительными кредитами и создайте что-нибудь простое.",
     brief: "Не усложняйте идею. Цель — создать работающий результат и привыкнуть быстро запускать проекты.",
     homework: "Создайте в Lovable одну простую работающую страницу или приложение. Можно решить небольшую личную проблему или показать одну полезную функцию. Опубликуйте проект и отправьте ссылку Lovable, которую сможет открыть любой пользователь, у которого она есть.",
+    rubric: [
+      "Проект создан в Lovable.",
+      "Ссылка открывает опубликованную страницу или приложение.",
+      "В проекте есть видимая страница или полезная функция.",
+      "Преподаватель может открыть проект без запроса доступа.",
+    ],
     artifact: "Ссылка на Lovable",
     videos: [{ title: "Lovable AI: сайт и хостинг за 5 минут", youtubeId: "nkPYaKZzW6o" }],
     submissionFields: [{ key: "lovable_url", label: "Ссылка на Lovable", type: "url", required: true, placeholder: "https://..." }],
@@ -362,6 +423,12 @@ const RUSSIAN_MISSION_COPY: Record<string, MissionTranslation> = {
     description: "Узнайте, что такое вайб-кодинг, затем создайте новый сайт или улучшите результат первой миссии.",
     brief: "Используйте любой no-code или AI-инструмент, например Replit, Lovable или Bolt.",
     homework: "Создайте новый сайт в Replit, Lovable или Bolt либо заметно улучшите первый проект. Добавьте или доработайте хотя бы одну полезную функцию, опубликуйте результат и отправьте ссылку на работающий сайт.",
+    rubric: [
+      "Результат — новый сайт или заметное улучшение проекта из первой миссии.",
+      "Сайт создан с помощью AI- или no-code-инструмента.",
+      "Добавлена или улучшена хотя бы одна полезная функция, секция контента или часть дизайна.",
+      "Отправленная ссылка открывает работающий сайт.",
+    ],
     artifact: "Ссылка на сайт",
     videos: [{ title: "Что такое вайб-кодинг", youtubeId: "w3K1EguBrTc" }],
     submissionFields: [{ key: "website_url", label: "Ссылка на сайт", type: "url", required: true, placeholder: "https://..." }],
@@ -372,6 +439,12 @@ const RUSSIAN_MISSION_COPY: Record<string, MissionTranslation> = {
     description: "Выберите один урок по работе с AI-агентом, попробуйте этот процесс и отправьте репозиторий GitHub с кодом.",
     brief: "Не нужно изучать все инструменты. Выберите Claude Code, Cursor или Codex и создайте код, которым можно поделиться.",
     homework: "Выберите Claude Code, Cursor или Codex и создайте с его помощью небольшой работающий проект. Загрузите файлы проекта на GitHub и отправьте ссылку на репозиторий. Убедитесь, что в репозитории есть ваш код и преподаватель может его открыть.",
+    rubric: [
+      "Для создания проекта использован Claude Code, Cursor или Codex.",
+      "В репозитории GitHub находится исходный код проекта.",
+      "Репозиторий содержит работающий результат, а не пустой проект.",
+      "Преподаватель может открыть репозиторий.",
+    ],
     artifact: "Ссылка на GitHub с кодом",
     videos: [
       { title: "Claude Code для начинающих", youtubeId: "jmJaHWVSwOo" },
@@ -386,6 +459,12 @@ const RUSSIAN_MISSION_COPY: Record<string, MissionTranslation> = {
     description: "Найдите реальные проблемы вокруг себя и предложите возможное решение для каждой.",
     brief: "Главная задача бизнеса — решать проблемы и зарабатывать деньги.",
     homework: "Запишите пять реальных проблем, с которыми сталкиваетесь вы или окружающие. Для каждой укажите, у кого и когда она возникает, а затем предложите одно возможное решение. Отправьте пять пронумерованных пар «проблема — решение».",
+    rubric: [
+      "Указаны пять разных реальных проблем.",
+      "Для каждой проблемы указано, кто с ней сталкивается.",
+      "Для каждой проблемы объяснено, когда или где она возникает.",
+      "Для каждой проблемы предложено одно возможное решение.",
+    ],
     artifact: "5 реальных проблем и 5 решений",
     videos: [{ title: "Как найти идею для IT-стартапа", youtubeId: "b96WmfzlBoc" }],
     submissionFields: [{ key: "problems_and_solutions", label: "Проблемы и решения", type: "textarea", required: true, placeholder: "Опишите 5 реальных проблем и 5 способов их решения." }],
@@ -396,6 +475,12 @@ const RUSSIAN_MISSION_COPY: Record<string, MissionTranslation> = {
     description: "Выйдите из офиса и узнайте новое из реальных разговоров.",
     brief: "Говорите с людьми напрямую. Узнайте, что они действительно делают, что причиняет им боль и что вас удивило.",
     homework: "Поговорите с потенциальными пользователями об одной из найденных проблем. Спрашивайте об их реальном прошлом опыте и не презентуйте своё решение. Отправьте пять разных выводов: укажите, с кем вы говорили и что узнали.",
+    rubric: [
+      "Выводы основаны на разговорах с потенциальными пользователями.",
+      "Указаны пять разных выводов.",
+      "Для каждого вывода указан собеседник или соответствующий сегмент клиентов.",
+      "Каждый вывод описывает конкретный результат разговора.",
+    ],
     artifact: "5 выводов из разговоров с клиентами",
     videos: [{ title: "Что такое проблемное интервью и зачем оно нужно", youtubeId: "BmNX3eCy5JY" }],
     submissionFields: [{ key: "conversation_insights", label: "Выводы из разговоров", type: "textarea", required: true, placeholder: "Запишите 5 выводов: с кем вы говорили и что узнали." }],
@@ -406,6 +491,12 @@ const RUSSIAN_MISSION_COPY: Record<string, MissionTranslation> = {
     description: "Превратите найденные проблемы и разговоры в амбициозные идеи стартапов.",
     brief: "Ищите амбициозные и конкретные идеи, связанные с реальными проблемами.",
     homework: "Превратите найденные проблемы и выводы из интервью в пять идей стартапов. Для каждой укажите целевого клиента, проблему и предлагаемое решение. Отправьте идеи пронумерованным списком и сформулируйте их достаточно конкретно, чтобы их можно было проверить.",
+    rubric: [
+      "Указаны пять разных идей стартапов.",
+      "Для каждой идеи определён целевой клиент.",
+      "Каждая идея решает конкретную реальную проблему.",
+      "Для каждой идеи предложено решение, которое можно проверить.",
+    ],
     artifact: "5 амбициозных идей стартапов",
     videos: [{ title: "Как протестировать бизнес-идею: 5 шагов к MVP", youtubeId: "_-SQM9EwHLM" }],
     submissionFields: [{ key: "startup_ideas", label: "Идеи стартапов", type: "textarea", required: true, placeholder: "Запишите 5 самых амбициозных идей стартапов." }],
@@ -416,6 +507,12 @@ const RUSSIAN_MISSION_COPY: Record<string, MissionTranslation> = {
     description: "Создайте минимально жизнеспособный продукт для проверки продуктовых гипотез.",
     brief: "MVP — это минимально жизнеспособный продукт. Проверьте гипотезы с помощью самой маленькой полезной версии.",
     homework: "Выберите одну ключевую гипотезу продукта и создайте минимальную работающую версию для её проверки. Реализуйте основной пользовательский сценарий, опубликуйте MVP и отправьте ссылку, которую сможет открыть преподаватель.",
+    rubric: [
+      "MVP проверяет одну понятную продуктовую гипотезу.",
+      "Основной пользовательский сценарий работает.",
+      "Отправленная ссылка открывает сам MVP.",
+      "Преподаватель может открыть его без запроса доступа.",
+    ],
     artifact: "Ссылка на MVP",
     videos: [{ title: "MVP для стартапа", youtubeId: "dJDPjR44AbM" }],
     submissionFields: [{ key: "mvp_url", label: "Ссылка на MVP", type: "url", required: true, placeholder: "https://..." }],
@@ -426,6 +523,12 @@ const RUSSIAN_MISSION_COPY: Record<string, MissionTranslation> = {
     description: "Расскажите всем о своём продукте, публикуя материалы о нём в интернете.",
     brief: "Опубликуйте 10 постов о продукте в Instagram, Threads или LinkedIn. Отправьте ссылки на аккаунты с этими публикациями.",
     homework: "Опубликуйте 10 постов о продукте в Instagram, Threads, LinkedIn или сразу в нескольких сетях. Расскажите о проблеме, продукте, ходе работы или полученных уроках. Добавьте ссылки на все аккаунты, где можно увидеть открытые публикации.",
+    rubric: [
+      "Опубликованы десять открытых постов о продукте.",
+      "Посты рассказывают о проблеме, продукте, ходе работы или полученных уроках.",
+      "Добавлены все аккаунты, в которых опубликованы посты.",
+      "Преподаватель может открыть публикации без запроса доступа.",
+    ],
     artifact: "Ссылки на аккаунты в соцсетях",
     videos: [{ title: "Схема продвижения во всех соцсетях", youtubeId: "B7QMtvVj7zE" }],
     submissionFields: [{ key: "social_account_links", label: "Ссылки на аккаунты в соцсетях", type: "link_list", required: true, placeholder: "https://..." }],
@@ -436,6 +539,12 @@ const RUSSIAN_MISSION_COPY: Record<string, MissionTranslation> = {
     description: "Опишите, кому вы продаёте и как собираетесь найти первых клиентов.",
     brief: "Конкретно опишите клиентов, где они проводят время и какие первые шаги продаж вы сделаете.",
     homework: "Определите один конкретный сегмент первых клиентов, где их можно найти и что вы им предложите. Затем опишите первые три действия по продажам, включая канал и сообщение. Отправьте полный план поиска клиентов и продаж в поле ниже.",
+    rubric: [
+      "Определён один конкретный сегмент первых клиентов.",
+      "В плане указано, где можно найти этих клиентов.",
+      "Описано предложение для этих клиентов.",
+      "Указаны три действия по продажам с каналом и сообщением для каждого.",
+    ],
     artifact: "План поиска клиентов и продаж",
     videos: [{ title: "Как и где стартапу найти первых клиентов", youtubeId: "lWwkb8d_4q0" }],
     submissionFields: [{ key: "customer_plan", label: "План поиска клиентов и продаж", type: "textarea", required: true, placeholder: "Опишите своих клиентов, каналы поиска и первые шаги продаж." }],

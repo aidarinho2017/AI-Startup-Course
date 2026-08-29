@@ -231,6 +231,7 @@ function ModuleInner({ slug }: { slug: string }) {
                 slug={mission.slug}
                 fields={mission.submissionFields}
                 instructions={mission.homework}
+                rubric={mission.rubric}
                 language={language}
               />
             </section>

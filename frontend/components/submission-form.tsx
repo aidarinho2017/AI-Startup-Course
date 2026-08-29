@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { HomeworkRubric } from "@/components/homework-rubric";
 
 function parseLinkListValue(value: string | undefined): string[] {
   if (!value) return [];
@@ -31,19 +32,21 @@ function serializeLinkListValue(links: string[]): string {
 }
 
 const COPY = {
-  en: { loadFailed: "Failed to load", saveFailed: "Failed to save", title: "Homework", submitted: "Submitted", loading: "Loading…", remove: "Remove", add: "Add account", saving: "Saving…", update: "Update submission", submit: "Submit", saved: "Last saved" },
-  ru: { loadFailed: "Не удалось загрузить", saveFailed: "Не удалось сохранить", title: "Задание", submitted: "Отправлено", loading: "Загрузка…", remove: "Удалить", add: "Добавить аккаунт", saving: "Сохранение…", update: "Обновить ответ", submit: "Отправить", saved: "Сохранено" },
+  en: { loadFailed: "Failed to load", saveFailed: "Failed to save", title: "Homework", rubric: "Before submitting, check", submitted: "Submitted", loading: "Loading…", remove: "Remove", add: "Add account", saving: "Saving…", update: "Update submission", submit: "Submit", saved: "Last saved" },
+  ru: { loadFailed: "Не удалось загрузить", saveFailed: "Не удалось сохранить", title: "Задание", rubric: "Перед отправкой проверьте", submitted: "Отправлено", loading: "Загрузка…", remove: "Удалить", add: "Добавить аккаунт", saving: "Сохранение…", update: "Обновить ответ", submit: "Отправить", saved: "Сохранено" },
 } as const;
 
 export function SubmissionForm({
   slug,
   fields,
   instructions,
+  rubric,
   language = "en",
 }: {
   slug: string;
   fields: SubmissionFieldSpec[];
   instructions: string;
+  rubric: string[];
   language?: CourseId;
 }) {
   const copy = COPY[language];
@@ -124,7 +127,8 @@ export function SubmissionForm({
           {savedAt && <Badge variant="success">{copy.submitted}</Badge>}
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-5">
+        <HomeworkRubric title={copy.rubric} items={rubric} />
         {loading ? (
           <p className="text-sm text-muted-foreground">{copy.loading}</p>
         ) : (

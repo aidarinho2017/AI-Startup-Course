@@ -8,6 +8,7 @@ import { getCourseMission } from "@/lib/course";
 import { InstructorSubmission } from "@/lib/types";
 import { InstructorOnly } from "@/components/instructor-only";
 import { SubmissionContent } from "@/components/submission-content";
+import { HomeworkRubric } from "@/components/homework-rubric";
 import { Topbar } from "@/components/topbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 
 function SubmissionCard({ sub, moduleSlug }: { sub: InstructorSubmission; moduleSlug: string }) {
+  const rubric = getCourseMission(moduleSlug)?.rubric ?? [];
   const queryClient = useQueryClient();
   const [feedback, setFeedback] = useState(sub.instructor_feedback ?? "");
   const [reviewed, setReviewed] = useState(sub.is_reviewed);
@@ -51,6 +53,10 @@ function SubmissionCard({ sub, moduleSlug }: { sub: InstructorSubmission; module
       </CardHeader>
       <CardContent className="space-y-4">
         <SubmissionContent content={sub.content} />
+        <HomeworkRubric
+          title={moduleSlug.startsWith("ru-") ? "Критерии проверки" : "Review criteria"}
+          items={rubric}
+        />
 
         <div className="space-y-2">
           <label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

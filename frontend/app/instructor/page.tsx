@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, ApiError } from "@/lib/api";
+import { getCourseMission } from "@/lib/course";
 import {
   InstructorModule,
   InstructorStudentSubmissions,
@@ -13,6 +14,7 @@ import {
 } from "@/lib/types";
 import { InstructorOnly } from "@/components/instructor-only";
 import { SubmissionContent } from "@/components/submission-content";
+import { HomeworkRubric } from "@/components/homework-rubric";
 import { Topbar } from "@/components/topbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -209,6 +211,7 @@ function StudentDetail({ studentId }: { studentId: string | null }) {
 }
 
 function InstructorSubmissionCard({ submission }: { submission: InstructorSubmission }) {
+  const mission = submission.module ? getCourseMission(submission.module.slug) : undefined;
   const queryClient = useQueryClient();
   const [feedback, setFeedback] = useState(submission.instructor_feedback ?? "");
   const [reviewed, setReviewed] = useState(submission.is_reviewed);
@@ -256,6 +259,10 @@ function InstructorSubmissionCard({ submission }: { submission: InstructorSubmis
       </CardHeader>
       <CardContent className="space-y-4">
         <SubmissionContent content={submission.content} />
+        <HomeworkRubric
+          title={submission.module && courseIdForSlug(submission.module.slug) === "ru" ? "Критерии проверки" : "Review criteria"}
+          items={mission?.rubric ?? []}
+        />
 
         <div className="space-y-2">
           <Label htmlFor={`feedback-${submission.id}`}>Feedback</Label>
