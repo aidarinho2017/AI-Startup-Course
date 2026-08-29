@@ -230,6 +230,7 @@ function ModuleInner({ slug }: { slug: string }) {
               <SubmissionForm
                 slug={mission.slug}
                 fields={mission.submissionFields}
+                instructions={mission.homework}
                 language={language}
               />
             </section>

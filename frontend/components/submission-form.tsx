@@ -31,17 +31,19 @@ function serializeLinkListValue(links: string[]): string {
 }
 
 const COPY = {
-  en: { loadFailed: "Failed to load", saveFailed: "Failed to save", title: "Homework", description: "Submit your artifact to complete this mission.", submitted: "Submitted", loading: "Loading…", remove: "Remove", add: "Add account", saving: "Saving…", update: "Update submission", submit: "Submit", saved: "Last saved" },
-  ru: { loadFailed: "Не удалось загрузить", saveFailed: "Не удалось сохранить", title: "Задание", description: "Отправьте результат, чтобы завершить миссию.", submitted: "Отправлено", loading: "Загрузка…", remove: "Удалить", add: "Добавить аккаунт", saving: "Сохранение…", update: "Обновить ответ", submit: "Отправить", saved: "Сохранено" },
+  en: { loadFailed: "Failed to load", saveFailed: "Failed to save", title: "Homework", submitted: "Submitted", loading: "Loading…", remove: "Remove", add: "Add account", saving: "Saving…", update: "Update submission", submit: "Submit", saved: "Last saved" },
+  ru: { loadFailed: "Не удалось загрузить", saveFailed: "Не удалось сохранить", title: "Задание", submitted: "Отправлено", loading: "Загрузка…", remove: "Удалить", add: "Добавить аккаунт", saving: "Сохранение…", update: "Обновить ответ", submit: "Отправить", saved: "Сохранено" },
 } as const;
 
 export function SubmissionForm({
   slug,
   fields,
+  instructions,
   language = "en",
 }: {
   slug: string;
   fields: SubmissionFieldSpec[];
+  instructions: string;
   language?: CourseId;
 }) {
   const copy = COPY[language];
@@ -116,7 +118,7 @@ export function SubmissionForm({
           <div>
             <CardTitle>{copy.title}</CardTitle>
             <CardDescription>
-              {copy.description}
+              {instructions}
             </CardDescription>
           </div>
           {savedAt && <Badge variant="success">{copy.submitted}</Badge>}

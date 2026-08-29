@@ -23,7 +23,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-type Locale = "en" | "ru";
+type Locale = "en" | "ru" | "kk";
 type Accent = "emerald" | "cyan" | "amber";
 type SearchParams = {
   lang?: string | string[];
@@ -411,11 +411,168 @@ const landingCopy: Record<Locale, LandingCopy> = {
       company: "Qasynda Group 2026",
     },
   },
+  kk: {
+    navItems: [
+      { href: "#result", label: "Нәтиже" },
+      { href: "#process", label: "Үдеріс" },
+      { href: "#audience", label: "Кімге арналған" },
+      { href: "#launch", label: "Іске қосу" },
+    ],
+    header: {
+      login: "Кіру",
+      start: "Бастау",
+      languageLabel: "Лендинг тілі",
+    },
+    badges: ["30 күнде MVP", "AI-first жұмыс үдерісі", "Алғашқы пайдаланушылар"],
+    hero: {
+      eyebrow: "AI-first өнімді іске қосу",
+      titleMobile: ["Өніміңді", "30 күнде", "іске қос"],
+      titleDesktop: "Өніміңді 30 күнде іске қос",
+      description:
+        "AI көмегімен идеядан MVP-ге, лендингке және алғашқы пайдаланушыларға дейін жет.",
+      primaryCta: "Бастау",
+      secondaryCta: "Не жасайтыныңды көр",
+    },
+    dashboard: {
+      flow: "Идея - MVP - Іске қосу - Өсу",
+      workflowSteps: ["Идея", "MVP", "Іске қосу", "Өсу"],
+      checklistTitle: "Іске қосу тізімі",
+      checklistSubtitle: "30 күндік спринт",
+      checklistItems: [
+        { label: "Мәселе анықталды", done: true },
+        { label: "MVP жасалды", done: true },
+        { label: "Лендинг жарияланды", done: true },
+        { label: "Алғашқы пайдаланушылар", done: false },
+      ],
+      assistantTitle: "AI көмекші",
+      assistantText: "MVP-дің алғашқы экраны мен ұсынысын әзірле.",
+      mvpReady: "MVP дайын",
+      userLeads: "ықтимал клиент",
+    },
+    result: {
+      eyebrow: "Нәтиже",
+      title: "30 күннен кейін қолыңда не болады",
+      description: "Сертификат емес. Нақты өнім.",
+      items: [
+        {
+          title: "MVP",
+          description: "Нарыққа көрсетуге болатын өнімнің жұмыс істейтін нұсқасы.",
+          icon: Layers3,
+        },
+        {
+          title: "Лендинг",
+          description: "Нақты ұсынысы мен әрекетке шақыруы бар өнім парақшасы.",
+          icon: Globe2,
+        },
+        {
+          title: "Алғашқы пайдаланушылар",
+          description: "Гипотезалар, сұхбаттар, кері байланыс және алғашқы өтінімдер.",
+          icon: Users,
+        },
+        {
+          title: "Питч-дек",
+          description:
+            "Серіктестерге, университеттерге немесе инвесторларға арналған ықшам презентация.",
+          icon: Presentation,
+        },
+        {
+          title: "Өнім портфолиосы",
+          description: "Нақты өнім мен оны жасау үдерісін көрсететін кейс.",
+          icon: FileText,
+        },
+        {
+          title: "Контент-жоспар",
+          description: "Сұранысты тексеруге арналған іске қосу және жарияланымдар жоспары.",
+          icon: Megaphone,
+        },
+      ],
+    },
+    process: {
+      eyebrow: "Үдеріс",
+      title: "Қарапайым. Жылдам. Іс жүзінде.",
+      description:
+        "Әр қадам өнімді нарыққа жақындатады: мәселе, MVP, кері байланыс және жинақталған кейс.",
+      steps: [
+        {
+          title: "Мәселені тап",
+          description: "Абстрактілі идеяға емес, аудиторияның мәселесіне назар аудар.",
+          icon: Target,
+        },
+        {
+          title: "AI көмегімен жаса",
+          description: "MVP экрандарын, мәтіндерді, интерфейстерді және логиканы жылдамырақ жаса.",
+          icon: Bot,
+        },
+        {
+          title: "Кері байланыс ал",
+          description: "Өнімді нақты адамдарға көрсетіп, ұсынысты жақсарт.",
+          icon: MessageSquare,
+        },
+        {
+          title: "MVP-ді іске қос",
+          description: "Лендингті жариялап, өтінімдер жина және алғашқы көрсеткіштерді бақыла.",
+          icon: Rocket,
+        },
+        {
+          title: "Кейсті рәсімде",
+          description: "Өнімді, шешімдерді және нәтижелерді мықты портфолио кейсіне айналдыр.",
+          icon: ClipboardCheck,
+        },
+      ],
+    },
+    audience: {
+      eyebrow: "Кімге арналған",
+      title: "Бір өнім жасау үдерісі. Іске қосудың үш форматы.",
+      description:
+        "Алдымен өнім мен нәтиже. Командаға, университетке немесе компанияға сай форматты таңда.",
+      cards: [
+        {
+          title: "Іске қосу",
+          description: "Өнімді 30 күнде іске қосу",
+          caption: "Құрылтайшылар мен командаларға",
+          icon: Rocket,
+          accent: "emerald",
+          ctaHref: "/login",
+          ctaLabel: "Бастау",
+        },
+        {
+          title: "Университет",
+          description: "15 апталық өнімдік білім беру жүйесі",
+          caption: "Университеттер мен инновациялық зертханаларға",
+          icon: Building2,
+          accent: "cyan",
+          ctaHref: "https://t.me/aidarissakhanov",
+          ctaLabel: "Университет жоспарын талқылау",
+        },
+        {
+          title: "Корпоративтік",
+          description: "Компанияның ішкі AI өнімдерін іске қосу",
+          caption: "Компанияларға",
+          icon: TrendingUp,
+          accent: "amber",
+          ctaHref: "https://t.me/aidarissakhanov",
+          ctaLabel: "Корпоративтік жоспарды талқылау",
+        },
+      ],
+    },
+    finalCta: {
+      eyebrow: "AI Product Builder",
+      titleLines: ["Тек оқи берме.", "Жасай баста."],
+      description: "30 күннен кейін тек білім емес, дайын өнімің болады.",
+      cta: "Өніміңді іске қос",
+      footnote: "Идея - MVP - алғашқы пайдаланушылар.",
+    },
+    footer: {
+      address: "Алматы, Төле би көшесі, 59",
+      company: "Qasynda Group 2026",
+    },
+  },
 };
 
 const languageOptions: Array<{ locale: Locale; label: string }> = [
   { locale: "en", label: "EN" },
   { locale: "ru", label: "RU" },
+  { locale: "kk", label: "KZ" },
 ];
 
 const primaryButton =
@@ -427,7 +584,7 @@ const secondaryButton =
 function getLocale(searchParams?: SearchParams): Locale {
   const lang = Array.isArray(searchParams?.lang) ? searchParams.lang[0] : searchParams?.lang;
 
-  return lang === "ru" ? "ru" : "en";
+  return lang === "ru" || lang === "kk" ? lang : "en";
 }
 
 function getLanguageHref(locale: Locale) {
