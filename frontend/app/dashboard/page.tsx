@@ -29,11 +29,11 @@ function DashboardInner() {
           <p className="mt-5 text-sm font-medium text-emerald-300">AI Product Builder</p>
           <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">Choose your course</h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-400 md:text-lg">
-            English and Russian follow the same curriculum with separate progress.
+            English, Russian, and Kazakh follow the same curriculum with separate progress.
           </p>
         </section>
 
-        <section className="mx-auto mt-10 grid max-w-4xl gap-5 md:grid-cols-2">
+        <section className="mx-auto mt-10 grid max-w-5xl gap-5 md:grid-cols-3">
           {COURSES.map((course) => {
             const completed = course.missions.filter((mission) => completedSlugs.has(mission.slug)).length;
             const progress = Math.round((completed / course.missions.length) * 100);

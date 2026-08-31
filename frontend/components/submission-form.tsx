@@ -34,6 +34,7 @@ function serializeLinkListValue(links: string[]): string {
 const COPY = {
   en: { loadFailed: "Failed to load", saveFailed: "Failed to save", title: "Homework", rubric: "Before submitting, check", submitted: "Submitted", loading: "Loading…", remove: "Remove", add: "Add account", saving: "Saving…", update: "Update submission", submit: "Submit", saved: "Last saved" },
   ru: { loadFailed: "Не удалось загрузить", saveFailed: "Не удалось сохранить", title: "Задание", rubric: "Перед отправкой проверьте", submitted: "Отправлено", loading: "Загрузка…", remove: "Удалить", add: "Добавить аккаунт", saving: "Сохранение…", update: "Обновить ответ", submit: "Отправить", saved: "Сохранено" },
+  kk: { loadFailed: "Жүктеу мүмкін болмады", saveFailed: "Сақтау мүмкін болмады", title: "Тапсырма", rubric: "Жібермес бұрын тексеріңіз", submitted: "Жіберілді", loading: "Жүктелуде…", remove: "Жою", add: "Аккаунт қосу", saving: "Сақталуда…", update: "Жауапты жаңарту", submit: "Жіберу", saved: "Сақталды" },
 } as const;
 
 export function SubmissionForm({
@@ -228,7 +229,7 @@ export function SubmissionForm({
               </Button>
               {savedAt && (
                 <p className="text-xs text-muted-foreground">
-                  {copy.saved} {new Date(savedAt).toLocaleString(language === "ru" ? "ru-RU" : "en-US")}
+                  {copy.saved} {new Date(savedAt).toLocaleString(language === "ru" ? "ru-RU" : language === "kk" ? "kk-KZ" : "en-US")}
                 </p>
               )}
             </div>

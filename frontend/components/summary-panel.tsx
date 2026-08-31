@@ -60,17 +60,22 @@ export function SummaryPanel({
   language?: CourseId;
 }) {
   const entries = Object.entries(summary);
+  const copy = {
+    en: { title: "AI summary", generated: "Generated", empty: "Empty summary.", locale: "en-US" },
+    ru: { title: "Сводка ИИ", generated: "Создано", empty: "Сводка пуста.", locale: "ru-RU" },
+    kk: { title: "AI қорытындысы", generated: "Жасалды", empty: "Қорытынды бос.", locale: "kk-KZ" },
+  }[language];
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{language === "ru" ? "Сводка ИИ" : "AI summary"}</CardTitle>
+        <CardTitle>{copy.title}</CardTitle>
         <CardDescription>
-          {language === "ru" ? "Создано" : "Generated"} {new Date(generatedAt).toLocaleString(language === "ru" ? "ru-RU" : "en-US")}
+          {copy.generated} {new Date(generatedAt).toLocaleString(copy.locale)}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {entries.length === 0 && (
-          <p className="text-sm text-muted-foreground">{language === "ru" ? "Сводка пуста." : "Empty summary."}</p>
+          <p className="text-sm text-muted-foreground">{copy.empty}</p>
         )}
         {entries.map(([k, v]) => (
           <div key={k} className="space-y-1">

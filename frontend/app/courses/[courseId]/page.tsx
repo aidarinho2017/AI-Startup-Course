@@ -50,6 +50,15 @@ const COPY = {
     noDeadline: "Срок пока не установлен", review: "Посмотреть", toolkit: "Набор инструментов",
     locked: "Этот раздел откроется после подготовки предыдущих миссий.", missing: "Курс не найден.",
   },
+  kk: {
+    allCourses: "Барлық курстар", heading: "Жасаңыз. Зерттеңіз. Іске қосыңыз. Өсіңіз.",
+    intro: "Курсты миссия бойынша өтіп, нақты нәтижелерді тексеруге жіберіңіз.",
+    progress: "Курс барысы", complete: "миссия орындалды", loading: "Прогресс жүктелуде...",
+    failed: "Прогресті жүктеу мүмкін болмады.", section: "Бөлім", active: "Қолжетімді", soon: "Жақында",
+    hide: "Жасыру", open: "Ашу", missions: "миссиялары", mission: "Миссия", due: "Мерзімі",
+    noDeadline: "Мерзім әлі белгіленбеген", review: "Қарау", toolkit: "Стартап құралдары",
+    locked: "Бұл бөлім алдыңғы миссиялар дайын болғаннан кейін ашылады.", missing: "Курс табылмады.",
+  },
 } as const;
 
 function CourseInner({ courseId }: { courseId: string }) {
@@ -129,7 +138,7 @@ function CourseInner({ courseId }: { courseId: string }) {
                     return <Link key={mission.slug} href={`/modules/${mission.slug}`} className="group flex min-h-[96px] flex-col justify-between gap-4 rounded-[8px] border border-white/10 bg-black/30 p-4 transition hover:border-emerald-300/40 sm:flex-row sm:items-center">
                       <div className="flex min-w-0 gap-4"><div className={`flex size-9 shrink-0 items-center justify-center rounded-[8px] border text-sm font-semibold ${done ? "border-emerald-300/40 bg-emerald-300/15 text-emerald-200" : "border-white/15 text-zinc-300"}`}>{done ? <CheckCircle2 className="size-4" aria-hidden="true" /> : number}</div>
                         <div><p className="text-xs uppercase tracking-widest text-zinc-500">{copy.mission} {number}</p><h3 className="mt-1 text-lg font-semibold">{mission.shortTitle}</h3><p className="mt-1 text-sm text-zinc-400">{mission.artifact}</p>
-                          {runtime?.due_at ? <p className="mt-1 text-xs text-zinc-500">{copy.due} {new Date(runtime.due_at).toLocaleString(language === "ru" ? "ru-RU" : "en-US")}</p> : runtime?.deadline_state === "not_set" ? <p className="mt-1 text-xs text-zinc-500">{copy.noDeadline}</p> : null}
+                          {runtime?.due_at ? <p className="mt-1 text-xs text-zinc-500">{copy.due} {new Date(runtime.due_at).toLocaleString(language === "ru" ? "ru-RU" : language === "kk" ? "kk-KZ" : "en-US")}</p> : runtime?.deadline_state === "not_set" ? <p className="mt-1 text-xs text-zinc-500">{copy.noDeadline}</p> : null}
                         </div></div><div className="flex items-center gap-2 text-sm font-medium text-emerald-200">{done ? copy.review : copy.open}<ArrowRight className="size-4 transition group-hover:translate-x-0.5" aria-hidden="true" /></div>
                     </Link>;
                   })}</div>}

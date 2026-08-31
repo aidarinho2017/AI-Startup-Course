@@ -54,7 +54,7 @@ function SubmissionCard({ sub, moduleSlug }: { sub: InstructorSubmission; module
       <CardContent className="space-y-4">
         <SubmissionContent content={sub.content} />
         <HomeworkRubric
-          title={moduleSlug.startsWith("ru-") ? "Критерии проверки" : "Review criteria"}
+          title={moduleSlug.startsWith("ru-") ? "Критерии проверки" : moduleSlug.startsWith("kk-") ? "Тексеру критерийлері" : "Review criteria"}
           items={rubric}
         />
 
@@ -111,7 +111,7 @@ function ModuleSubmissionsInner({ slug }: { slug: string }) {
           {mission?.title ?? slug.replace(/-/g, " ")} — Submissions
         </h1>
         <Badge variant="outline" className="mt-3">
-          {slug.startsWith("ru-") ? "Russian Course" : "English Course"}
+          {slug.startsWith("ru-") ? "Russian Course" : slug.startsWith("kk-") ? "Kazakh Course" : "English Course"}
         </Badge>
 
         {isLoading && <p className="mt-10 text-sm text-muted-foreground">Loading…</p>}

@@ -247,6 +247,63 @@ _RUSSIAN_COPY: dict[str, tuple[str, str, str, str]] = {
     ),
 }
 
+_KAZAKH_COPY: dict[str, tuple[str, str, str, str]] = {
+    "build-simple": (
+        "1-миссия — Қарапайымнан бастаңыз",
+        "Lovable арқылы қарапайым жоба жасап, жоба сілтемесін жіберіңіз.",
+        "Lovable сілтемесі",
+        "https://...",
+    ),
+    "build-vibe-coding": (
+        "2-миссия — Вайб-кодингті үйреніңіз",
+        "Вайб-кодингпен танысып, жаңа сайт жасаңыз немесе алғашқы жобаңызды жақсартыңыз.",
+        "Сайт сілтемесі",
+        "https://...",
+    ),
+    "build-real-vibe-coding": (
+        "3-миссия — Нағыз вайб-кодингті қолданып көріңіз",
+        "AI-кодинг құралын таңдап, коды бар GitHub репозиторийін жіберіңіз.",
+        "Коды бар GitHub сілтемесі",
+        "https://github.com/...",
+    ),
+    "discover-find-problem": (
+        "4-миссия — Мәселені табыңыз",
+        "Айналаңыздағы нақты мәселелерді тауып, әрқайсысына ықтимал шешім ұсыныңыз.",
+        "Мәселелер мен шешімдер",
+        "5 нақты мәселе мен оларды шешудің 5 жолын жазыңыз.",
+    ),
+    "discover-talk-to-people": (
+        "5-миссия — Адамдармен сөйлесіңіз",
+        "Ықтимал пайдаланушылармен сөйлесіп, олардың нақты тәжірибесінен жаңа нәрсе біліңіз.",
+        "Сұхбаттан алынған қорытындылар",
+        "Кіммен сөйлескеніңізді және не білгеніңізді көрсететін 5 қорытынды жазыңыз.",
+    ),
+    "discover-evaluate-ideas": (
+        "6-миссия — Стартап идеяларын тауып, бағалаңыз",
+        "Табылған мәселелер мен сұхбаттарды нақты стартап идеяларына айналдырыңыз.",
+        "Стартап идеялары",
+        "Ең өршіл 5 стартап идеяңызды жазыңыз.",
+    ),
+    "launch-build-mvp": (
+        "7-миссия — MVP жасаңыз",
+        "Өнім гипотезасын тексеретін минималды өміршең өнім жасаңыз.",
+        "MVP сілтемесі",
+        "https://...",
+    ),
+    "launch-product-online": (
+        "8-миссия — Өнімді онлайн іске қосыңыз",
+        "Өніміңіз туралы әлеуметтік желілерде жариялап, аудиторияға таныстырыңыз.",
+        "Әлеуметтік желідегі аккаунт сілтемелері",
+        "https://...",
+    ),
+    "launch-first-customers": (
+        "9-миссия — Алғашқы клиенттерді табыңыз",
+        "Кімге сататыныңызды және алғашқы клиенттерге қалай жететініңізді сипаттаңыз.",
+        "Клиенттерді табу және сату жоспары",
+        "Клиенттеріңізді, арналарды және сатудың алғашқы қадамдарын сипаттаңыз.",
+    ),
+}
+
 
 def _russian_module(module: ModuleSpec) -> ModuleSpec:
     title, description, label, placeholder = _RUSSIAN_COPY[module["slug"]]
@@ -262,18 +319,36 @@ def _russian_module(module: ModuleSpec) -> ModuleSpec:
     }
 
 
+def _kazakh_module(module: ModuleSpec) -> ModuleSpec:
+    title, description, label, placeholder = _KAZAKH_COPY[module["slug"]]
+    fields = [dict(field) for field in module["submission_fields"]]
+    fields[0]["label"] = label
+    fields[0]["placeholder"] = placeholder
+    return {
+        **module,
+        "slug": f"kk-{module['slug']}",
+        "title": title,
+        "description": description,
+        "submission_fields": fields,
+    }
+
+
 RUSSIAN_MODULES: list[ModuleSpec] = [_russian_module(module) for module in ENGLISH_MODULES]
-MODULES: list[ModuleSpec] = [*ENGLISH_MODULES, *RUSSIAN_MODULES]
+KAZAKH_MODULES: list[ModuleSpec] = [_kazakh_module(module) for module in ENGLISH_MODULES]
+MODULES: list[ModuleSpec] = [*ENGLISH_MODULES, *RUSSIAN_MODULES, *KAZAKH_MODULES]
 COURSE_MODULE_SLUGS: dict[str, tuple[str, ...]] = {
     "en": tuple(module["slug"] for module in ENGLISH_MODULES),
     "ru": tuple(module["slug"] for module in RUSSIAN_MODULES),
+    "kk": tuple(module["slug"] for module in KAZAKH_MODULES),
 }
 ACTIVE_MODULE_SLUGS: tuple[str, ...] = tuple(module["slug"] for module in MODULES)
 
 
 def base_module_slug(slug: str) -> str:
-    return slug.removeprefix("ru-")
+    return slug.removeprefix("ru-").removeprefix("kk-")
 
 
 def course_id_for_slug(slug: str) -> str:
-    return "ru" if slug.startswith("ru-") else "en"
+    if slug.startswith("ru-"):
+        return "ru"
+    return "kk" if slug.startswith("kk-") else "en"

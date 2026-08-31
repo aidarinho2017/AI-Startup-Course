@@ -23,8 +23,8 @@ class Settings(BaseSettings):
 
     GOOGLE_CLIENT_ID: str = ""
 
-    OPENAI_API_KEY: str = ""
-    OPENAI_MODEL: str = "gpt-5.4-mini"
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-3.5-flash-lite"
 
     TELEGRAM_BOT_TOKEN: str = ""
     TELEGRAM_BOT_USERNAME: str = ""

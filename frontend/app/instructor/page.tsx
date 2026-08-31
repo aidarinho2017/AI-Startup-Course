@@ -24,8 +24,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 type View = "modules" | "students" | "groups";
-const COURSE_LABEL = { en: "English Course", ru: "Russian Course" } as const;
-const courseIdForSlug = (slug: string) => slug.startsWith("ru-") ? "ru" : "en";
+const COURSE_LABEL = { en: "English Course", ru: "Russian Course", kk: "Kazakh Course" } as const;
+const courseIdForSlug = (slug: string): keyof typeof COURSE_LABEL =>
+  slug.startsWith("ru-") ? "ru" : slug.startsWith("kk-") ? "kk" : "en";
+const reviewCriteriaForSlug = (slug: string) =>
+  slug.startsWith("ru-") ? "Критерии проверки" : slug.startsWith("kk-") ? "Тексеру критерийлері" : "Review criteria";
 
 function InstructorDashboardInner() {
   const [view, setView] = useState<View>("modules");
@@ -85,7 +88,7 @@ function ModulesTab() {
 
       {data && (
         <div className="space-y-8">
-          {(["en", "ru"] as const).map((courseId) => (
+          {(["en", "ru", "kk"] as const).map((courseId) => (
             <div key={courseId}>
               <h2 className="mb-3 text-lg font-semibold">{COURSE_LABEL[courseId]}</h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -260,7 +263,7 @@ function InstructorSubmissionCard({ submission }: { submission: InstructorSubmis
       <CardContent className="space-y-4">
         <SubmissionContent content={submission.content} />
         <HomeworkRubric
-          title={submission.module && courseIdForSlug(submission.module.slug) === "ru" ? "Критерии проверки" : "Review criteria"}
+          title={submission.module ? reviewCriteriaForSlug(submission.module.slug) : "Review criteria"}
           items={mission?.rubric ?? []}
         />
 

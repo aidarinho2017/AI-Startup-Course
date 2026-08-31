@@ -9,7 +9,7 @@ from app.config import settings
 from app.content.modules_seed import base_module_slug, course_id_for_slug
 from app.content.prompts import SUMMARY_SCHEMAS, SYSTEM_PROMPTS
 from app.models import ChatMessage, ChatSession, ChatSummary, Module
-from app.services.openai_client import client
+from app.services.gemini_client import get_client, prepare_contents
 
 
 async def get_or_create_session(
@@ -44,8 +44,11 @@ def _system_prompt_for(slug: str) -> str:
     prompt = SYSTEM_PROMPTS.get(base_module_slug(slug))
     if prompt is None:
         raise ValueError(f"No system prompt for module {slug!r}")
-    if course_id_for_slug(slug) == "ru":
+    course_id = course_id_for_slug(slug)
+    if course_id == "ru":
         return f"{prompt}\n\nAlways respond in Russian."
+    if course_id == "kk":
+        return f"{prompt}\n\nAlways respond in Kazakh."
     return prompt
 
 
@@ -69,18 +72,16 @@ async def stream_chat(
 
     full_text_parts: list[str] = []
     try:
-        stream = await client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
-            messages=messages,
-            stream=True,
+        contents, system_instruction = prepare_contents(messages)
+        stream = await get_client().aio.models.generate_content_stream(
+            model=settings.GEMINI_MODEL,
+            contents=contents,
+            config={"system_instruction": system_instruction},
         )
         async for chunk in stream:
-            if not chunk.choices:
-                continue
-            delta = chunk.choices[0].delta
-            if delta and delta.content:
-                full_text_parts.append(delta.content)
-                yield f"data: {json.dumps({'delta': delta.content})}\n\n"
+            if chunk.text:
+                full_text_parts.append(chunk.text)
+                yield f"data: {json.dumps({'delta': chunk.text})}\n\n"
         yield "data: [DONE]\n\n"
     except Exception as exc:  # surface the error to the client and persist what we have
         yield f"data: {json.dumps({'error': str(exc)})}\n\n"
@@ -115,12 +116,17 @@ async def generate_summary(
         }
     )
 
-    completion = await client.chat.completions.create(
-        model=settings.OPENAI_MODEL,
-        messages=messages,
-        response_format={"type": "json_schema", "json_schema": schema},
+    contents, system_instruction = prepare_contents(messages)
+    response = await get_client().aio.models.generate_content(
+        model=settings.GEMINI_MODEL,
+        contents=contents,
+        config={
+            "system_instruction": system_instruction,
+            "response_mime_type": "application/json",
+            "response_json_schema": schema.get("schema", schema),
+        },
     )
-    raw = completion.choices[0].message.content or "{}"
+    raw = response.text or "{}"
     parsed = json.loads(raw)
 
     existing = await db.scalar(select(ChatSummary).where(ChatSummary.session_id == session.id))

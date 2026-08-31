@@ -7,7 +7,7 @@ A full-stack interactive course platform for aspiring founders. Students follow 
 | Layer | Technology |
 |---|---|
 | Backend | FastAPI, SQLAlchemy (async), PostgreSQL, Alembic |
-| AI | OpenAI API (streaming chat via SSE) |
+| AI | Gemini API (streaming chat via SSE) |
 | Frontend | Next.js 15, React Query, Tailwind CSS |
 | Auth | JWT (python-jose) |
 
@@ -21,7 +21,7 @@ A full-stack interactive course platform for aspiring founders. Students follow 
 │   │   ├── models/                   # SQLAlchemy ORM models
 │   │   ├── routers/                  # FastAPI route handlers
 │   │   ├── schemas/                  # Pydantic schemas
-│   │   ├── services/                 # chat, OpenAI client
+│   │   ├── services/                 # chat, Gemini client
 │   │   └── seed.py                   # idempotent DB seeder
 │   ├── alembic/                      # DB migrations
 │   ├── requirements.txt
@@ -45,7 +45,7 @@ A full-stack interactive course platform for aspiring founders. Students follow 
 
 ```bash
 cd backend
-cp .env.example .env          # fill in DATABASE_URL, JWT_SECRET, OPENAI_API_KEY
+cp .env.example .env          # fill in DATABASE_URL, JWT_SECRET, GEMINI_API_KEY
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -98,8 +98,8 @@ The seeder is idempotent for active missions and does not delete archived module
 |---|---|
 | `DATABASE_URL` | PostgreSQL async DSN (`postgresql+asyncpg://...`) |
 | `JWT_SECRET` | Random secret for signing JWTs — generate with `python -c "import secrets; print(secrets.token_urlsafe(48))"` |
-| `OPENAI_API_KEY` | Your OpenAI API key |
-| `OPENAI_MODEL` | Model name, e.g. `gpt-4o-mini` |
+| `GEMINI_API_KEY` | Your Gemini API key |
+| `GEMINI_MODEL` | Model name, default `gemini-3.5-flash-lite` |
 | `TELEGRAM_BOT_TOKEN` | Telegram Bot API token from BotFather |
 | `TELEGRAM_BOT_USERNAME` | Bot username without `@`, used for dashboard deep links |
 | `TELEGRAM_WEBHOOK_SECRET` | Secret checked against Telegram webhook requests |

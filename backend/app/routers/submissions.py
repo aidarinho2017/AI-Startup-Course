@@ -18,7 +18,11 @@ def _validate_submission(slug: str, content: dict) -> dict:
     spec = _SPEC_BY_SLUG.get(slug)
     if spec is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Module not found")
-    russian = course_id_for_slug(slug) == "ru"
+    language = course_id_for_slug(slug)
+
+    def message(english: str, russian: str, kazakh: str) -> str:
+        return {"ru": russian, "kk": kazakh}.get(language, english)
+
     cleaned: dict = {}
     for field in spec["submission_fields"]:
         key = field["key"]
@@ -26,7 +30,11 @@ def _validate_submission(slug: str, content: dict) -> dict:
         if not isinstance(value, str):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(f"Поле '{key}' должно быть строкой" if russian else f"Field '{key}' must be a string"),
+                detail=message(
+                    f"Field '{key}' must be a string",
+                    f"Поле '{key}' должно быть строкой",
+                    f"'{key}' өрісі мәтін болуы керек",
+                ),
             )
         value = value.strip()
         if field["type"] == "link_list":
@@ -35,18 +43,30 @@ def _validate_submission(slug: str, content: dict) -> dict:
             except json.JSONDecodeError as exc:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=(f"Поле «{field['label']}» должно содержать список ссылок" if russian else f"Field '{field['label']}' must be a valid list of links"),
+                    detail=message(
+                        f"Field '{field['label']}' must be a valid list of links",
+                        f"Поле «{field['label']}» должно содержать список ссылок",
+                        f"«{field['label']}» өрісінде сілтемелер тізімі болуы керек",
+                    ),
                 ) from exc
             if not isinstance(links, list) or not all(isinstance(link, str) for link in links):
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=(f"Поле «{field['label']}» должно содержать список ссылок" if russian else f"Field '{field['label']}' must be a valid list of links"),
+                    detail=message(
+                        f"Field '{field['label']}' must be a valid list of links",
+                        f"Поле «{field['label']}» должно содержать список ссылок",
+                        f"«{field['label']}» өрісінде сілтемелер тізімі болуы керек",
+                    ),
                 )
             cleaned_links = [link.strip() for link in links if link.strip()]
             if field.get("required") and not cleaned_links:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=(f"Поле «{field['label']}» обязательно" if russian else f"Field '{field['label']}' is required"),
+                    detail=message(
+                        f"Field '{field['label']}' is required",
+                        f"Поле «{field['label']}» обязательно",
+                        f"«{field['label']}» өрісі міндетті",
+                    ),
                 )
             invalid_link = next(
                 (
@@ -59,21 +79,33 @@ def _validate_submission(slug: str, content: dict) -> dict:
             if invalid_link is not None:
                 raise HTTPException(
                     status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                    detail=(f"Поле «{field['label']}» должно содержать корректные ссылки" if russian else f"Field '{field['label']}' must contain valid URLs"),
+                    detail=message(
+                        f"Field '{field['label']}' must contain valid URLs",
+                        f"Поле «{field['label']}» должно содержать корректные ссылки",
+                        f"«{field['label']}» өрісінде жарамды сілтемелер болуы керек",
+                    ),
                 )
             cleaned[key] = json.dumps(cleaned_links)
             continue
         if field.get("required") and not value:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(f"Поле «{field['label']}» обязательно" if russian else f"Field '{field['label']}' is required"),
+                detail=message(
+                    f"Field '{field['label']}' is required",
+                    f"Поле «{field['label']}» обязательно",
+                    f"«{field['label']}» өрісі міндетті",
+                ),
             )
         if field["type"] == "url" and value and not (
             value.startswith("http://") or value.startswith("https://")
         ):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=(f"Поле «{field['label']}» должно содержать корректную ссылку" if russian else f"Field '{field['label']}' must be a valid URL"),
+                detail=message(
+                    f"Field '{field['label']}' must be a valid URL",
+                    f"Поле «{field['label']}» должно содержать корректную ссылку",
+                    f"«{field['label']}» өрісінде жарамды сілтеме болуы керек",
+                ),
             )
         cleaned[key] = value
     return cleaned

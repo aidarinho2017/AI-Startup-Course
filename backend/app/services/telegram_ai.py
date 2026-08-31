@@ -17,7 +17,7 @@ from app.models import (
     TelegramAIMessage,
     User,
 )
-from app.services.openai_client import client
+from app.services.gemini_client import get_client, prepare_contents
 from app.services.telegram_service import send_chat_action, send_message, telegram_enabled
 
 logger = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ async def queue_telegram_ai_message(user: User, chat_id: str, content: str) -> N
 
 
 async def run_telegram_ai_loop() -> None:
-    if not telegram_enabled() or not settings.OPENAI_API_KEY:
+    if not telegram_enabled() or not settings.GEMINI_API_KEY:
         return
 
     interval = max(settings.TELEGRAM_AI_WORKER_INTERVAL_SECONDS, 1)
@@ -82,7 +82,7 @@ async def run_telegram_ai_loop() -> None:
 
 
 async def run_telegram_ai_once() -> int:
-    if not telegram_enabled() or not settings.OPENAI_API_KEY:
+    if not telegram_enabled() or not settings.GEMINI_API_KEY:
         return 0
 
     processed = 0
@@ -125,13 +125,15 @@ async def _process_batch(batch_id: int) -> None:
 
         chat_id, messages = payload
         await send_chat_action(chat_id, "typing")
-        completion = await client.chat.completions.create(
-            model=settings.OPENAI_MODEL,
-            messages=messages,
+        contents, system_instruction = prepare_contents(messages)
+        response = await get_client().aio.models.generate_content(
+            model=settings.GEMINI_MODEL,
+            contents=contents,
+            config={"system_instruction": system_instruction},
         )
-        reply = _clean_telegram_ai_reply(completion.choices[0].message.content or "")
+        reply = _clean_telegram_ai_reply(response.text or "")
         if not reply:
-            raise RuntimeError("OpenAI returned an empty Telegram AI reply")
+            raise RuntimeError("Gemini returned an empty Telegram AI reply")
 
         if not await _send_long_message(chat_id, reply):
             raise RuntimeError("Telegram AI reply could not be sent")
@@ -182,11 +184,11 @@ async def _load_batch_payload(batch_id: int) -> tuple[str, list[dict]] | None:
             await db.commit()
             return None
 
-        messages = await _build_openai_messages(db, user, batch, user_messages)
+        messages = await _build_ai_messages(db, user, batch, user_messages)
         return batch.telegram_chat_id, messages
 
 
-async def _build_openai_messages(
+async def _build_ai_messages(
     db,
     user: User,
     batch: TelegramAIBatch,

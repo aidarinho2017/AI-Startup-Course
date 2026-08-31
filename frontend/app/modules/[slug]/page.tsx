@@ -55,9 +55,22 @@ const RUSSIAN_MENTOR_QUESTIONS: Record<string, string> = {
   "launch-first-customers": "Кто ваши первые клиенты и какой первый практический шаг продаж вы сделаете?",
 };
 
+const KAZAKH_MENTOR_QUESTIONS: Record<string, string> = {
+  "build-simple": "Lovable платформасында не жасағыңыз келеді және бүгін жариялауға болатын ең шағын нұсқа қандай?",
+  "build-vibe-coding": "Қандай сайт жасап немесе жақсартып жатырсыз және келуші онда не істей алуы керек?",
+  "build-real-vibe-coding": "Бұл миссия үшін қай құралды таңдадыңыз және GitHub-қа қандай код жібересіз?",
+  "discover-find-problem": "Қандай мәселелерді жиі байқайсыз және олардың қайсысын шешу үшін адамдар ақша төлеуі мүмкін?",
+  "discover-talk-to-people": "Алдымен кіммен сөйлестіңіз және оның мәселені сипаттауында сізді не таңғалдырды?",
+  "discover-evaluate-ideas": "Қай стартап идеяңыз ең өршіл және ол қандай нақты мәселені шешеді?",
+  "launch-build-mvp": "MVP қандай гипотезаны тексеруі керек және іске қосуға болатын ең шағын пайдалы нұсқа қандай?",
+  "launch-product-online": "Өніміңіз туралы алғаш қайда жариялайсыз және жарияланымдарды қандай сілтемелер көрсетеді?",
+  "launch-first-customers": "Алғашқы клиент сегментіңіз кім және сатудағы алғашқы нақты қадамыңыз қандай?",
+};
+
 const COPY = {
   en: { back: "Back to course", missing: "Mission not found", notActive: "This mission is not part of the active course.", mission: "Mission", completed: "Completed", due: "Due", noDeadline: "Deadline not set yet", loading: "Loading mission state...", failed: "Failed to load this mission.", resources: "Resources", video: "Video", chooseVideo: "Choose one video", github: "GitHub", githubText: "GitHub is a place to store, version, and share code. For this mission, create a repository, push your project code there, and submit the repository link.", artifact: "Artifact" },
   ru: { back: "Назад к курсу", missing: "Миссия не найдена", notActive: "Эта миссия не входит в активный курс.", mission: "Миссия", completed: "Выполнено", due: "Срок", noDeadline: "Срок пока не установлен", loading: "Загрузка миссии...", failed: "Не удалось загрузить миссию.", resources: "Материалы", video: "Видео", chooseVideo: "Выберите одно видео", github: "GitHub", githubText: "GitHub — это сервис для хранения, управления версиями и публикации кода. Создайте репозиторий, загрузите туда код проекта и отправьте ссылку.", artifact: "Результат" },
+  kk: { back: "Курсқа оралу", missing: "Миссия табылмады", notActive: "Бұл миссия белсенді курсқа кірмейді.", mission: "Миссия", completed: "Орындалды", due: "Мерзімі", noDeadline: "Мерзім әлі белгіленбеген", loading: "Миссия жүктелуде...", failed: "Миссияны жүктеу мүмкін болмады.", resources: "Материалдар", video: "Видео", chooseVideo: "Бір видеоны таңдаңыз", github: "GitHub", githubText: "GitHub — кодты сақтау, нұсқаларын басқару және бөлісу сервисі. Репозиторий жасап, жоба кодын жүктеп, сілтемесін жіберіңіз.", artifact: "Нәтиже" },
 } as const;
 
 function MissingMission({ language }: { language: CourseId }) {
@@ -93,7 +106,7 @@ function ModuleInner({ slug }: { slug: string }) {
   });
 
   if (!mission) {
-    return <MissingMission language={slug.startsWith("ru-") ? "ru" : "en"} />;
+    return <MissingMission language={slug.startsWith("ru-") ? "ru" : slug.startsWith("kk-") ? "kk" : "en"} />;
   }
 
   const course = getMissionCourse(mission);
@@ -135,7 +148,7 @@ function ModuleInner({ slug }: { slug: string }) {
                     variant="outline"
                     className="rounded-[8px] border-white/15 text-zinc-300"
                   >
-                    {copy.due} {new Date(data.due_at).toLocaleString(language === "ru" ? "ru-RU" : "en-US")}
+                    {copy.due} {new Date(data.due_at).toLocaleString(language === "ru" ? "ru-RU" : language === "kk" ? "kk-KZ" : "en-US")}
                   </Badge>
                 ) : data?.deadline_state === "not_set" ? (
                   <Badge
@@ -253,7 +266,9 @@ function ModuleInner({ slug }: { slug: string }) {
                 language={language}
                 openingQuestion={language === "ru"
                   ? RUSSIAN_MENTOR_QUESTIONS[mission.slug.replace(/^ru-/, "")]
-                  : MENTOR_QUESTIONS[mission.slug]}
+                  : language === "kk"
+                    ? KAZAKH_MENTOR_QUESTIONS[mission.slug.replace(/^kk-/, "")]
+                    : MENTOR_QUESTIONS[mission.slug]}
               />
             )}
           </aside>
