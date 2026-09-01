@@ -12,9 +12,41 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useAuth } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
 import { GuestOnly } from "@/components/auth-redirect";
+import { LanguageSwitcher, useLocale, useLocaleFromUrl } from "@/components/language-switcher";
+
+const COPY = {
+  en: {
+    language: "Interface language", title: "Create account", description: "Start the AI startup course.",
+    or: "or", name: "Name", email: "Email", password: "Password", passwordHint: "At least 8 characters.",
+    passwordError: "Password must be at least 8 characters", submit: "Create account", submitting: "Creating account...",
+    hasAccount: "Already have an account?", signin: "Sign in", failed: "Signup failed", googleFailed: "Google sign-up failed",
+    errors: { "Email already registered": "Email already registered", "Google login is not configured": "Google login is not configured", "Invalid Google token": "Invalid Google token" },
+  },
+  ru: {
+    language: "Язык интерфейса", title: "Создать аккаунт", description: "Начните курс по AI-стартапам.",
+    or: "или", name: "Имя", email: "Электронная почта", password: "Пароль", passwordHint: "Минимум 8 символов.",
+    passwordError: "Пароль должен содержать не менее 8 символов", submit: "Создать аккаунт", submitting: "Создание аккаунта...",
+    hasAccount: "Уже есть аккаунт?", signin: "Войти", failed: "Не удалось зарегистрироваться", googleFailed: "Не удалось зарегистрироваться через Google",
+    errors: { "Email already registered": "Эта почта уже зарегистрирована", "Google login is not configured": "Вход через Google не настроен", "Invalid Google token": "Недействительный токен Google" },
+  },
+  kk: {
+    language: "Интерфейс тілі", title: "Аккаунт ашу", description: "AI стартап курсын бастаңыз.",
+    or: "немесе", name: "Аты-жөні", email: "Электрондық пошта", password: "Құпиясөз", passwordHint: "Кемінде 8 таңба.",
+    passwordError: "Құпиясөз кемінде 8 таңбадан тұруы керек", submit: "Аккаунт ашу", submitting: "Аккаунт ашылуда...",
+    hasAccount: "Аккаунтыңыз бар ма?", signin: "Кіру", failed: "Тіркелу мүмкін болмады", googleFailed: "Google арқылы тіркелу мүмкін болмады",
+    errors: { "Email already registered": "Бұл пошта бұрын тіркелген", "Google login is not configured": "Google арқылы кіру бапталмаған", "Invalid Google token": "Google токені жарамсыз" },
+  },
+} as const;
+
+function authError(error: unknown, fallback: string, messages: Readonly<Record<string, string>>) {
+  return error instanceof ApiError ? messages[error.message] ?? fallback : fallback;
+}
 
 function SignupInner() {
   const { signup, googleLogin } = useAuth();
+  const { locale } = useLocale();
+  useLocaleFromUrl();
+  const copy = COPY[locale];
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,14 +57,14 @@ function SignupInner() {
     e.preventDefault();
     setError(null);
     if (password.length < 8) {
-      setError("Password must be at least 8 characters");
+      setError(copy.passwordError);
       return;
     }
     setSubmitting(true);
     try {
       await signup(email, password, name);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Signup failed");
+      setError(authError(err, copy.failed, copy.errors));
       setSubmitting(false);
     }
   };
@@ -52,22 +84,23 @@ function SignupInner() {
 
       <Card className="relative z-10 w-full max-w-[25rem] rounded-[8px] border-white/10 bg-black/60 text-white shadow-2xl shadow-emerald-950/25 backdrop-blur-xl">
         <CardHeader className="p-5 pb-4">
-          <Link href="/" className="mb-6 flex w-fit items-center gap-3">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-white text-black">
-              <BrainCircuit className="size-4" aria-hidden="true" />
-            </span>
-            <span className="text-sm font-semibold text-white">
-              AI Product Builder
-            </span>
-          </Link>
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <Link href={`/?lang=${locale}`} className="flex min-w-0 items-center gap-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-white text-black">
+                <BrainCircuit className="size-4" aria-hidden="true" />
+              </span>
+              <span className="truncate text-sm font-semibold text-white">AI Product Builder</span>
+            </Link>
+            <LanguageSwitcher label={copy.language} />
+          </div>
 
           <div className="flex size-10 items-center justify-center rounded-[8px] border border-emerald-300/25 bg-emerald-300/10 text-emerald-200">
             <Rocket className="size-5" aria-hidden="true" />
           </div>
           <div className="pt-3">
-            <CardTitle className="text-2xl text-white">Create account</CardTitle>
+            <CardTitle className="text-2xl text-white">{copy.title}</CardTitle>
             <CardDescription className="mt-2 text-zinc-400">
-              Start the AI startup course.
+              {copy.description}
             </CardDescription>
           </div>
         </CardHeader>
@@ -81,10 +114,10 @@ function SignupInner() {
                 try {
                   await googleLogin(credential);
                 } catch (err) {
-                  setError(err instanceof ApiError ? err.message : "Google sign-up failed");
+                  setError(authError(err, copy.googleFailed, copy.errors));
                 }
               }}
-              onError={() => setError("Google sign-up failed")}
+              onError={() => setError(copy.googleFailed)}
               theme="filled_black"
               size="large"
               text="signup_with"
@@ -96,14 +129,14 @@ function SignupInner() {
 
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-white/10" />
-            <span className="text-xs text-zinc-500">or</span>
+            <span className="text-xs text-zinc-500">{copy.or}</span>
             <div className="h-px flex-1 bg-white/10" />
           </div>
 
           <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-2">
               <Label htmlFor="name" className="text-zinc-200">
-                Name
+                {copy.name}
               </Label>
               <Input
                 id="name"
@@ -115,7 +148,7 @@ function SignupInner() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-zinc-200">
-                Email
+                {copy.email}
               </Label>
               <Input
                 id="email"
@@ -129,7 +162,7 @@ function SignupInner() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-zinc-200">
-                Password
+                {copy.password}
               </Label>
               <Input
                 id="password"
@@ -141,7 +174,7 @@ function SignupInner() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="border-white/10 bg-black/35 text-white placeholder:text-zinc-600 focus-visible:ring-emerald-300/25"
               />
-              <p className="text-xs text-zinc-500">At least 8 characters.</p>
+              <p className="text-xs text-zinc-500">{copy.passwordHint}</p>
             </div>
             {error && (
               <p className="rounded-[8px] border border-red-400/20 bg-red-400/10 px-3 py-2 text-sm text-red-200">
@@ -153,14 +186,14 @@ function SignupInner() {
               className="min-h-11 w-full rounded-[8px] bg-white text-sm font-semibold text-black hover:bg-emerald-200"
               disabled={submitting}
             >
-              {submitting ? "Creating account..." : "Create account"}
+              {submitting ? copy.submitting : copy.submit}
             </Button>
           </form>
 
           <p className="text-center text-sm text-zinc-400">
-            Already have an account?{" "}
-            <Link href="/login" className="font-medium text-emerald-200 underline-offset-4 hover:underline">
-              Sign in
+            {copy.hasAccount}{" "}
+            <Link href={`/login?lang=${locale}`} className="font-medium text-emerald-200 underline-offset-4 hover:underline">
+              {copy.signin}
             </Link>
           </p>
         </CardContent>

@@ -8,8 +8,32 @@ import { COURSES } from "@/lib/course";
 import { DashboardOut } from "@/lib/types";
 import { Protected } from "@/components/protected";
 import { Topbar } from "@/components/topbar";
+import { useLocale } from "@/components/language-switcher";
+
+const COPY = {
+  en: {
+    heading: "Choose your course",
+    description: "English, Russian, and Kazakh follow the same curriculum with separate progress.",
+    loading: "Loading progress...",
+    failed: "Failed to load progress.",
+  },
+  ru: {
+    heading: "Выберите курс",
+    description: "Курсы на английском, русском и казахском проходят по одной программе с отдельным прогрессом.",
+    loading: "Загрузка прогресса...",
+    failed: "Не удалось загрузить прогресс.",
+  },
+  kk: {
+    heading: "Курсты таңдаңыз",
+    description: "Ағылшын, орыс және қазақ тілдеріндегі курстардың бағдарламасы бірдей, ал прогресі бөлек сақталады.",
+    loading: "Прогресс жүктелуде...",
+    failed: "Прогресті жүктеу мүмкін болмады.",
+  },
+} as const;
 
 function DashboardInner() {
+  const { locale } = useLocale();
+  const copy = COPY[locale];
   const { data, isLoading, error } = useQuery<DashboardOut>({
     queryKey: ["dashboard"],
     queryFn: () => api<DashboardOut>("/dashboard"),
@@ -27,9 +51,9 @@ function DashboardInner() {
             <Languages className="size-5" aria-hidden="true" />
           </div>
           <p className="mt-5 text-sm font-medium text-emerald-300">AI Product Builder</p>
-          <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">Choose your course</h1>
+          <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-6xl">{copy.heading}</h1>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-zinc-400 md:text-lg">
-            English, Russian, and Kazakh follow the same curriculum with separate progress.
+            {copy.description}
           </p>
         </section>
 
@@ -68,8 +92,8 @@ function DashboardInner() {
           })}
         </section>
 
-        {isLoading && <p className="mt-6 text-center text-sm text-zinc-500">Loading progress...</p>}
-        {error && <p className="mt-6 text-center text-sm text-red-300">Failed to load progress.</p>}
+        {isLoading && <p className="mt-6 text-center text-sm text-zinc-500">{copy.loading}</p>}
+        {error && <p className="mt-6 text-center text-sm text-red-300">{copy.failed}</p>}
       </main>
     </div>
   );

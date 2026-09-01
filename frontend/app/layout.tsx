@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { Providers } from "./providers";
+import { LOCALE_COOKIE, parseLocale } from "@/lib/locale";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -13,15 +15,17 @@ export const metadata: Metadata = {
     "AI-first platform for launching an MVP, landing page, and first users in 30 days.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const locale = parseLocale((await cookies()).get(LOCALE_COOKIE)?.value);
+
   return (
-    <html lang="en" className="h-full">
+    <html lang={locale} className="h-full">
       <body className="min-h-full antialiased">
-        <Providers>{children}</Providers>
+        <Providers initialLocale={locale}>{children}</Providers>
       </body>
     </html>
   );

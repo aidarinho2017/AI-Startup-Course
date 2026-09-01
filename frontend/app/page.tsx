@@ -1,5 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
+import { LanguageLinks } from "@/components/language-switcher";
+import { LOCALE_COOKIE, Locale, parseLocale } from "@/lib/locale";
 import {
   ArrowRight,
   BarChart3,
@@ -23,7 +26,6 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-type Locale = "en" | "ru" | "kk";
 type Accent = "emerald" | "cyan" | "amber";
 type SearchParams = {
   lang?: string | string[];
@@ -569,26 +571,24 @@ const landingCopy: Record<Locale, LandingCopy> = {
   },
 };
 
-const languageOptions: Array<{ locale: Locale; label: string }> = [
-  { locale: "en", label: "EN" },
-  { locale: "ru", label: "RU" },
-  { locale: "kk", label: "KZ" },
-];
-
 const primaryButton =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-[8px] bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300";
 
 const secondaryButton =
   "inline-flex min-h-11 items-center justify-center gap-2 rounded-[8px] border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white transition hover:border-white/30 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30";
 
-function getLocale(searchParams?: SearchParams): Locale {
+function getLocale(searchParams: SearchParams | undefined, fallback: Locale): Locale {
   const lang = Array.isArray(searchParams?.lang) ? searchParams.lang[0] : searchParams?.lang;
 
-  return lang === "ru" || lang === "kk" ? lang : "en";
+  return lang ? parseLocale(lang) : fallback;
 }
 
 function getLanguageHref(locale: Locale) {
   return `/?lang=${locale}`;
+}
+
+function getAuthHref(path: string, locale: Locale) {
+  return `${path}?lang=${locale}`;
 }
 
 function SectionHeader({
@@ -607,40 +607,6 @@ function SectionHeader({
       {description ? (
         <p className="mt-5 text-base leading-7 text-zinc-400 md:text-lg">{description}</p>
       ) : null}
-    </div>
-  );
-}
-
-function LanguageSwitcher({
-  locale,
-  label,
-}: {
-  locale: Locale;
-  label: string;
-}) {
-  return (
-    <div
-      aria-label={label}
-      className="flex items-center rounded-[8px] border border-white/10 bg-white/[0.04] p-1 text-xs font-semibold"
-    >
-      {languageOptions.map((option) => {
-        const isActive = option.locale === locale;
-
-        return (
-          <Link
-            key={option.locale}
-            href={getLanguageHref(option.locale)}
-            aria-current={isActive ? "page" : undefined}
-            className={`rounded-[6px] px-2 py-1.5 transition ${
-              isActive
-                ? "bg-white text-black"
-                : "text-zinc-400 hover:bg-white/10 hover:text-white"
-            }`}
-          >
-            {option.label}
-          </Link>
-        );
-      })}
     </div>
   );
 }
@@ -792,7 +758,8 @@ type LandingPageProps = {
 };
 
 export default async function LandingPage({ searchParams }: LandingPageProps) {
-  const locale = getLocale(searchParams ? await searchParams : undefined);
+  const storedLocale = parseLocale((await cookies()).get(LOCALE_COOKIE)?.value);
+  const locale = getLocale(searchParams ? await searchParams : undefined, storedLocale);
   const copy = landingCopy[locale];
   const rootHref = getLanguageHref(locale);
 
@@ -818,14 +785,14 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           </nav>
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
-            <LanguageSwitcher locale={locale} label={copy.header.languageLabel} />
+            <LanguageLinks locale={locale} label={copy.header.languageLabel} />
             <Link
-              href="/login"
+              href={getAuthHref("/login", locale)}
               className="hidden rounded-[8px] px-4 py-2 text-sm font-medium text-zinc-300 transition hover:bg-white/10 hover:text-white sm:inline-flex"
             >
               {copy.header.login}
             </Link>
-            <Link href="/signup" className="inline-flex min-h-10 items-center justify-center gap-2 rounded-[8px] bg-white px-3 py-2 text-sm font-semibold text-black transition hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 sm:min-h-11 sm:px-5 sm:py-3">
+            <Link href={getAuthHref("/signup", locale)} className="inline-flex min-h-10 items-center justify-center gap-2 rounded-[8px] bg-white px-3 py-2 text-sm font-semibold text-black transition hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 sm:min-h-11 sm:px-5 sm:py-3">
               {copy.header.start}
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
@@ -865,7 +832,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link href="/signup" className={primaryButton}>
+              <Link href={getAuthHref("/signup", locale)} className={primaryButton}>
                 <Rocket className="size-4" aria-hidden="true" />
                 {copy.hero.primaryCta}
               </Link>
@@ -965,7 +932,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
                   <h3 className="mt-4 text-3xl font-semibold text-white">{card.title}</h3>
                   <p className="mt-5 text-base leading-7 text-zinc-300">{card.description}</p>
                   <Link
-                    href={card.ctaHref}
+                    href={isExternalCta ? card.ctaHref : getAuthHref(card.ctaHref, locale)}
                     target={isExternalCta ? "_blank" : undefined}
                     rel={isExternalCta ? "noreferrer" : undefined}
                     className="mt-8 inline-flex items-center gap-2 text-sm font-semibold text-white transition hover:text-emerald-200"
@@ -997,7 +964,7 @@ export default async function LandingPage({ searchParams }: LandingPageProps) {
           </p>
           <div className="mt-9 flex justify-center">
             <Link
-              href="/signup"
+              href={getAuthHref("/signup", locale)}
               className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[8px] bg-white px-6 py-3 text-sm font-semibold text-black transition hover:bg-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
             >
               <Rocket className="size-4" aria-hidden="true" />

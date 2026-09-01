@@ -12,9 +12,38 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { useAuth } from "@/lib/auth";
 import { ApiError } from "@/lib/api";
 import { GuestOnly } from "@/components/auth-redirect";
+import { LanguageSwitcher, useLocale, useLocaleFromUrl } from "@/components/language-switcher";
+
+const COPY = {
+  en: {
+    language: "Interface language", title: "Sign in", description: "Continue your AI startup course.",
+    or: "or", email: "Email", password: "Password", submit: "Sign in", submitting: "Signing in...",
+    noAccount: "No account?", signup: "Sign up", failed: "Login failed", googleFailed: "Google login failed",
+    errors: { "Invalid email or password": "Invalid email or password", "Google login is not configured": "Google login is not configured", "Invalid Google token": "Invalid Google token" },
+  },
+  ru: {
+    language: "Язык интерфейса", title: "Войти", description: "Продолжите обучение на курсе по AI-стартапам.",
+    or: "или", email: "Электронная почта", password: "Пароль", submit: "Войти", submitting: "Вход...",
+    noAccount: "Нет аккаунта?", signup: "Зарегистрироваться", failed: "Не удалось войти", googleFailed: "Не удалось войти через Google",
+    errors: { "Invalid email or password": "Неверная почта или пароль", "Google login is not configured": "Вход через Google не настроен", "Invalid Google token": "Недействительный токен Google" },
+  },
+  kk: {
+    language: "Интерфейс тілі", title: "Кіру", description: "AI стартап курсында оқуды жалғастырыңыз.",
+    or: "немесе", email: "Электрондық пошта", password: "Құпиясөз", submit: "Кіру", submitting: "Кіру...",
+    noAccount: "Аккаунтыңыз жоқ па?", signup: "Тіркелу", failed: "Кіру мүмкін болмады", googleFailed: "Google арқылы кіру мүмкін болмады",
+    errors: { "Invalid email or password": "Пошта немесе құпиясөз қате", "Google login is not configured": "Google арқылы кіру бапталмаған", "Invalid Google token": "Google токені жарамсыз" },
+  },
+} as const;
+
+function authError(error: unknown, fallback: string, messages: Readonly<Record<string, string>>) {
+  return error instanceof ApiError ? messages[error.message] ?? fallback : fallback;
+}
 
 function LoginInner() {
   const { login, googleLogin } = useAuth();
+  const { locale } = useLocale();
+  useLocaleFromUrl();
+  const copy = COPY[locale];
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +56,7 @@ function LoginInner() {
     try {
       await login(email, password);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "Login failed");
+      setError(authError(err, copy.failed, copy.errors));
       setSubmitting(false);
     }
   };
@@ -47,22 +76,23 @@ function LoginInner() {
 
       <Card className="relative z-10 w-full max-w-[25rem] rounded-[8px] border-white/10 bg-black/60 text-white shadow-2xl shadow-emerald-950/25 backdrop-blur-xl">
         <CardHeader className="p-5 pb-4">
-          <Link href="/" className="mb-6 flex w-fit items-center gap-3">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-white text-black">
-              <BrainCircuit className="size-4" aria-hidden="true" />
-            </span>
-            <span className="text-sm font-semibold text-white">
-              AI Product Builder
-            </span>
-          </Link>
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <Link href={`/?lang=${locale}`} className="flex min-w-0 items-center gap-3">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-[8px] bg-white text-black">
+                <BrainCircuit className="size-4" aria-hidden="true" />
+              </span>
+              <span className="truncate text-sm font-semibold text-white">AI Product Builder</span>
+            </Link>
+            <LanguageSwitcher label={copy.language} />
+          </div>
 
           <div className="flex size-10 items-center justify-center rounded-[8px] border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
             <LockKeyhole className="size-5" aria-hidden="true" />
           </div>
           <div className="pt-3">
-            <CardTitle className="text-2xl text-white">Sign in</CardTitle>
+            <CardTitle className="text-2xl text-white">{copy.title}</CardTitle>
             <CardDescription className="mt-2 text-zinc-400">
-              Continue your AI startup course.
+              {copy.description}
             </CardDescription>
           </div>
         </CardHeader>
@@ -76,10 +106,10 @@ function LoginInner() {
                 try {
                   await googleLogin(credential);
                 } catch (err) {
-                  setError(err instanceof ApiError ? err.message : "Google login failed");
+                  setError(authError(err, copy.googleFailed, copy.errors));
                 }
               }}
-              onError={() => setError("Google login failed")}
+              onError={() => setError(copy.googleFailed)}
               theme="filled_black"
               size="large"
               text="signin_with"
@@ -91,14 +121,14 @@ function LoginInner() {
 
           <div className="flex items-center gap-3">
             <div className="h-px flex-1 bg-white/10" />
-            <span className="text-xs text-zinc-500">or</span>
+            <span className="text-xs text-zinc-500">{copy.or}</span>
             <div className="h-px flex-1 bg-white/10" />
           </div>
 
           <form className="space-y-4" onSubmit={onSubmit}>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-zinc-200">
-                Email
+                {copy.email}
               </Label>
               <Input
                 id="email"
@@ -112,7 +142,7 @@ function LoginInner() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-zinc-200">
-                Password
+                {copy.password}
               </Label>
               <Input
                 id="password"
@@ -134,14 +164,14 @@ function LoginInner() {
               className="min-h-11 w-full rounded-[8px] bg-white text-sm font-semibold text-black hover:bg-emerald-200"
               disabled={submitting}
             >
-              {submitting ? "Signing in..." : "Sign in"}
+              {submitting ? copy.submitting : copy.submit}
             </Button>
           </form>
 
           <p className="text-center text-sm text-zinc-400">
-            No account?{" "}
-            <Link href="/signup" className="font-medium text-emerald-200 underline-offset-4 hover:underline">
-              Sign up
+            {copy.noAccount}{" "}
+            <Link href={`/signup?lang=${locale}`} className="font-medium text-emerald-200 underline-offset-4 hover:underline">
+              {copy.signup}
             </Link>
           </p>
         </CardContent>
